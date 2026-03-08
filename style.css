@@ -187,22 +187,32 @@ footer {
     nav { padding: 10px 5px; gap: 6px; }
     nav a { padding: 8px 10px; font-size: 0.85rem; }
 }
-/* هذا الكود سيجعل الصفحة الرئيسية وتواصل معنا تملأ الشاشة 100% */
-@media (max-width: 768px) {
-    .container, .hero-section, .contact-section {
+/* ضبط العرض الكامل 100% لجميع الشاشات الصغيرة */
+@media screen and (max-width: 480px) {
+    html, body {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden; /* يمنع الاهتزاز الجانبي */
+    }
+
+    .container, section, .hero, .contact-container {
         width: 100% !important;
-        padding-left: 15px;
-        padding-right: 15px;
+        max-width: 100% !important;
+        padding: 20px 15px !important; /* مساحة تنفس بسيطة من الجوانب */
+        margin: 0 !important;
+        display: block !important;
         box-sizing: border-box;
     }
 
-    /* تكبير الخطوط قليلاً لتناسب الموبايل */
-    h1 {
-        font-size: 1.8rem !important;
+    /* تكبير العناصر لتملأ المساحة مثل صفحة الكتيب */
+    .hero-content, .contact-form {
+        width: 100% !important;
+        font-size: 1.1rem; /* تكبير الخط لسهولة القراءة */
     }
-    
-    p {
-        font-size: 1rem !important;
+
+    img {
+        max-width: 100%;
+        height: auto;
     }
 }
-
