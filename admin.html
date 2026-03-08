@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>لوحة تحكم الإدارة - صغارنا</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div>
+    <header class="top-header">
+        <h1>لوحة تحكم المشرف <i class="fa-solid fa-user-gear"></i></h1>
+        <p>نهتم بمستقبل أطفالكم من خلال توفير رعاية صحية ذكية وسهولة الوصول . </p>
+    </div>
+
+        <nav>
+            <a href="index.html">الرئيسية</a>
+            <a href="admin.html" class="active">إحصائيات الإدارة</a>
+            <a href="dashboard.html">الكتيب الإلكتروني</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="card" style="max-width: 800px;">
+            <h2>📊 ملخص النظام العام</h2>
+            <p>مرحباً أيها المشرف، إليك حالة المنظومة اليوم:</p>
+
+            <div style="display: flex; gap: 20px; margin-top: 20px; justify-content: center; flex-wrap: wrap;">
+                <div style="background: #e0e7ff; padding: 20px; border-radius: 15px; flex: 1; min-width: 150px;">
+                    <h3 id="childCount">0</h3>
+                    <p>أطفال مسجلين</p>
+                </div>
+                <div style="background: #dcfce7; padding: 20px; border-radius: 15px; flex: 1; min-width: 150px;">
+                    <h3 id="bookingCount">4</h3>
+                    <p>مواعيد متاحة</p>
+                </div>
+            </div>
+
+            <h3 style="margin-top: 30px; text-align: right;">🔧 إجراءات سريعة</h3>
+            <button class="btn" onclick="alert('تم إرسال تنبيهات لجميع الأمهات بمواعيد الغد!')" style="background: var(--primary); margin-top: 10px;">إرسال تنبيهات جماعية 🔔</button>
+            <button class="btn" onclick="clearData()" style="background: #ef4444; margin-top: 10px;">تصفير بيانات النظام (للتجربة)</button>
+        </div>
+    </div>
+     <footer>
+        <p>جميع الحقوق محفوظة &copy; 2026 - منظومة صغارنا للتطعيمات</p>
+        <p>بنغازي - ليبيا | حماية أطفالنا مسؤوليتنا <i class="fa-solid fa-heart" style="color:#ef4444;"></i></p>
+    </footer>
+
+    <script>
+        // جلب البيانات لعرض الإحصائيات الحقيقية
+        const children = JSON.parse(localStorage.getItem('vaccine_children')) || [];
+        document.getElementById('childCount').innerText = children.length;
+
+        function clearData() {
+            if(confirm("سيتم حذف كل الأطفال والحجوزات، هل أنتِ متأكدة؟ (هذا للتجربة فقط)")) {
+                localStorage.clear();
+                location.reload();
+            }
+        }
+    </script>
+</body>
+</html>

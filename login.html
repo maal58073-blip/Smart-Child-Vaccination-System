@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>دخول - منظومة التطعيمات</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="top-header">
+        <h1>منظومة التطعيمات <i class="fa-solid fa-shield-halved"></i></h1>
+        <p>مرحباً بعودتكِ أيتها الأم المثالية</p>
+    </div>
+    
+    <nav>
+        <a href="index.html"><i class="fa-solid fa-house"></i> الرئيسية</a>
+        <a href="register.html"><i class="fa-solid fa-user-plus"></i> تسجيل حساب</a>
+        <a href="login.html" class="active"><i class="fa-solid fa-arrow-right-to-bracket"></i> دخول</a>
+        <a href="contact.html"><i class="fa-solid fa-envelope"></i> تواصل معنا</a>
+    </nav>
+
+    <div class="container">
+        <div class="card">
+            <h2>تسجيل الدخول <i class="fa-solid fa-lock"></i></h2>
+            <p style="margin-bottom: 20px; color: #64748b;">أدخلي بياناتكِ للوصول إلى كتيب الطفل ومواعيد الحجز</p>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>البريد الإلكتروني:</label>
+                    <input type="email" id="loginEmail" placeholder="example@mail.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label>كلمة المرور:</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="loginPassword" placeholder="********" required>
+                        <i class="fa-solid fa-eye-slash toggle-password" onclick="togglePassword('loginPassword', this)"></i>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn">
+                    <i class="fa-solid fa-right-to-bracket"></i> تسجيل الدخول
+                </button>
+            </form>
+            
+            <p style="margin-top: 15px; font-size: 0.9rem;">
+                ليس لديكِ حساب؟ <a href="register.html" style="color: var(--primary); font-weight: bold; text-decoration: none;">سجلي الآن</a>
+            </p>
+        </div>
+    </div>
+
+    <footer>
+        <p>جميع الحقوق محفوظة &copy; 2026 - منظومة صغارنا للتطعيمات</p>
+        <p>بنغازي - ليبيا | حماية أطفالنا مسؤوليتنا <i class="fa-solid fa-heart" style="color:#ef4444;"></i></p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
