@@ -188,60 +188,30 @@ footer {
     nav a { padding: 8px 10px; font-size: 0.85rem; }
 }
 
-/* --- التعديل الاحترافي لملء شاشة الموبايل 100% --- */
-@media screen and (max-width: 480px) {
-    /* 1. جعل خلفية الصفحة بالكامل موحدة لمنع ظهور حواف فارغة */
-    body {
-        background-color: #ffffff !important; 
-        margin: 0;
-        padding: 0;
-    }
+/* هذا الكود يطبق على كل الصفحات ويجبرها على التمدد */
+.container {
+    width: 100% !important;
+    max-width: 100vw !important; /* ملء عرض الشاشة بالكامل */
+    margin: 0 !important;
+    padding: 0 20px !important;
+    box-sizing: border-box;
+}
 
-    /* 2. إجبار الحاوية الرئيسية على أخذ العرض الكامل */
-    .container, 
-    .main-content, 
-    .hero-section, 
-    .contact-container, 
-    .admin-dashboard {
-        width: 100% !important;
-        max-width: 100% !important;
-        margin: 0 !important;
-        padding: 10px !important; /* مساحة داخلية صغيرة جداً للحواف */
-        box-sizing: border-box;
-    }
+/* إخفاء أي فراغ جانبي يسبب صغر الحجم */
+html, body {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
 
-    /* 3. ضبط البطاقة البيضاء (Card) لتملأ الشاشة */
-    .card, .form-container, .stats-container {
-        width: 100% !important;
-        border-radius: 0 !important; /* إزالة الحواف المستديرة لجعلها ملتصقة بالجوانب */
-        box-shadow: none !important; /* اختياري: لجعلها مسطحة وأكثر عصرية على الموبايل */
-        padding: 20px 10px !important;
-    }
-
-    /* 4. ضبط التباعد بين العنوان والصورة والفوتر */
-    .hero-content h1 {
-        font-size: 1.6rem !important;
-        margin-bottom: 15px !important; /* تقليل المسافة تحت العنوان */
-    }
-
-    .hero-image img {
-        width: 100% !important;
-        height: auto !important;
-        margin-top: 10px !important;
-        margin-bottom: 20px !important; /* تباعد كافٍ قبل الفوتر */
-    }
-
-    /* 5. ضمان التصاق الفوتر بأسفل الشاشة وعرضه الكامل */
-    footer {
-        width: 100% !important;
-        margin-top: auto !important;
-        padding: 20px 0 !important;
-    }
-
-    /* 6. تكبير الأزرار لتكون سهلة الضغط وممتدة */
-    .btn, button {
-        width: 100% !important;
-        padding: 15px !important;
-        font-size: 1.1rem !important;
-    }
+/* لضمان أن العناصر بداخل الصفحات تملأ المساحة */
+section, .hero, .contact-container, .admin-panel {
+    width: 100% !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
