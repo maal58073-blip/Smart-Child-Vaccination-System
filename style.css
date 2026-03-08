@@ -187,32 +187,61 @@ footer {
     nav { padding: 10px 5px; gap: 6px; }
     nav a { padding: 8px 10px; font-size: 0.85rem; }
 }
-/* ضبط العرض الكامل 100% لجميع الشاشات الصغيرة */
+
+/* --- التعديل الاحترافي لملء شاشة الموبايل 100% --- */
 @media screen and (max-width: 480px) {
-    html, body {
-        width: 100%;
+    /* 1. جعل خلفية الصفحة بالكامل موحدة لمنع ظهور حواف فارغة */
+    body {
+        background-color: #ffffff !important; 
         margin: 0;
         padding: 0;
-        overflow-x: hidden; /* يمنع الاهتزاز الجانبي */
     }
 
-    .container, section, .hero, .contact-container {
+    /* 2. إجبار الحاوية الرئيسية على أخذ العرض الكامل */
+    .container, 
+    .main-content, 
+    .hero-section, 
+    .contact-container, 
+    .admin-dashboard {
         width: 100% !important;
         max-width: 100% !important;
-        padding: 20px 15px !important; /* مساحة تنفس بسيطة من الجوانب */
         margin: 0 !important;
-        display: block !important;
+        padding: 10px !important; /* مساحة داخلية صغيرة جداً للحواف */
         box-sizing: border-box;
     }
 
-    /* تكبير العناصر لتملأ المساحة مثل صفحة الكتيب */
-    .hero-content, .contact-form {
+    /* 3. ضبط البطاقة البيضاء (Card) لتملأ الشاشة */
+    .card, .form-container, .stats-container {
         width: 100% !important;
-        font-size: 1.1rem; /* تكبير الخط لسهولة القراءة */
+        border-radius: 0 !important; /* إزالة الحواف المستديرة لجعلها ملتصقة بالجوانب */
+        box-shadow: none !important; /* اختياري: لجعلها مسطحة وأكثر عصرية على الموبايل */
+        padding: 20px 10px !important;
     }
 
-    img {
-        max-width: 100%;
-        height: auto;
+    /* 4. ضبط التباعد بين العنوان والصورة والفوتر */
+    .hero-content h1 {
+        font-size: 1.6rem !important;
+        margin-bottom: 15px !important; /* تقليل المسافة تحت العنوان */
+    }
+
+    .hero-image img {
+        width: 100% !important;
+        height: auto !important;
+        margin-top: 10px !important;
+        margin-bottom: 20px !important; /* تباعد كافٍ قبل الفوتر */
+    }
+
+    /* 5. ضمان التصاق الفوتر بأسفل الشاشة وعرضه الكامل */
+    footer {
+        width: 100% !important;
+        margin-top: auto !important;
+        padding: 20px 0 !important;
+    }
+
+    /* 6. تكبير الأزرار لتكون سهلة الضغط وممتدة */
+    .btn, button {
+        width: 100% !important;
+        padding: 15px !important;
+        font-size: 1.1rem !important;
     }
 }
