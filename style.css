@@ -187,3 +187,22 @@ footer {
     nav { padding: 10px 5px; gap: 6px; }
     nav a { padding: 8px 10px; font-size: 0.85rem; }
 }
+/* هذا الكود سيجعل الصفحة الرئيسية وتواصل معنا تملأ الشاشة 100% */
+@media (max-width: 768px) {
+    .container, .hero-section, .contact-section {
+        width: 100% !important;
+        padding-left: 15px;
+        padding-right: 15px;
+        box-sizing: border-box;
+    }
+
+    /* تكبير الخطوط قليلاً لتناسب الموبايل */
+    h1 {
+        font-size: 1.8rem !important;
+    }
+    
+    p {
+        font-size: 1rem !important;
+    }
+}
+
