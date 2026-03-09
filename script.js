@@ -134,4 +134,23 @@ if (loginForm) {
 document.addEventListener('DOMContentLoaded', () => {
     loadVaccines();
     renderArchive();
+
 });
+// كود تحديث المواعيد بناءً على المركز المختارة
+const centerSelect = document.getElementById('centerSelect');
+
+if (centerSelect) {
+    centerSelect.addEventListener('change', function() {
+        const selectedCenter = this.value;
+        
+        // هنا نخبر النظام أن يحدث الجدول بناءً على المركز
+        console.log("تم اختيار مركز: " + selectedCenter);
+        
+        // إذا كان عندك دالة اسمها renderAppointments أو ما يشابهها، سنستدعيها هنا
+        if (typeof renderAppointments === "function") {
+            renderAppointments(); 
+        }
+        
+        alert("عرض المواعيد المتوفرة في: " + selectedCenter);
+    });
+}
