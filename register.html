@@ -63,5 +63,16 @@
     </footer>
 
     <script src="script.js"></script>
+    <script>
+    // هذا الكود يضمن وضع تاريخ اليوم كأقصى حد فور تحميل الصفحة
+    document.addEventListener('DOMContentLoaded', function() {
+        const dateInput = document.getElementById('dob');
+        if (dateInput) {
+            const today = new Date().toISOString().split('T')[0];
+            dateInput.setAttribute('max', today);
+        }
+    });
+</script>
 </body>
 </html>
+
