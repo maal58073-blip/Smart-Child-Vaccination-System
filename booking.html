@@ -27,13 +27,12 @@
             <form id="bookingForm">
                 <div class="form-group">
                     <label>اسم الطفل:</label>
-                    <select id="childSelect" required>
-                        </select>
+                    <select id="childSelect" required></select>
                 </div>
 
                 <div class="form-group">
                     <label>المركز الصحي:</label>
-                    <select id="centerSelect" required>
+                    <select id="centerSelect" required onchange="updateAppointmentsByCenter()">
                         <option value="الفويهات">مركز الفويهات الصحي</option>
                         <option value="الكيش">مجمع عيادات الكيش</option>
                         <option value="الماجوري">المركز الصحي الماجوري</option>
@@ -42,7 +41,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label>المواعيد والأماكن المتاحة:</label>
+                    <label id="vaccineLabel">المواعيد المتاحة في المركز:</label>
                     <div class="table-responsive">
                         <table class="vaccine-table">
                             <thead>
@@ -53,8 +52,7 @@
                                     <th>الأماكن المتبقية</th>
                                 </tr>
                             </thead>
-                            <tbody id="appointmentsList">
-                                </tbody>
+                            <tbody id="appointmentsList"></tbody>
                         </table>
                     </div>
                 </div>
@@ -70,14 +68,34 @@
     </footer>
 
     <script>
-        // 1. جلب بيانات الأطفال من الذاكرة (التي أضفناها في لوحة الأم)
+        // 1. بيانات التطعيمات المتاحة لكل مركز (طلب الأستاذة الأساسي)
+        const centerData = {
+            "الفويهات": [
+                { id: 101, vaccine: 'شلل الأطفال', date: '12 مايو 2026', spots: 8 },
+                { id: 102, vaccine: 'الحصبة (MMR)', date: '15 مايو 2026', spots: 4 }
+            ],
+            "الكيش": [
+                { id: 201, vaccine: 'الدرن (BCG)', date: '20 مايو 2026', spots: 12 },
+                { id: 202, vaccine: 'الثلاثي البكتيري', date: '22 مايو 2026', spots: 6 }
+            ],
+            "الماجوري": [
+                { id: 301, vaccine: 'التهاب الكبد', date: '25 مايو 2026', spots: 15 },
+                { id: 302, vaccine: 'شلل الأطفال', date: '28 مايو 2026', spots: 2 }
+            ],
+            "سيدي حسين": [
+                { id: 401, vaccine: 'الحصبة الألمانية', date: '01 يونيو 2026', spots: 10 },
+                { id: 402, vaccine: 'المكورات الرئوية', date: '05 يونيو 2026', spots: 5 }
+            ]
+        };
+
+        // 2. جلب بيانات الأطفال
         const children = JSON.parse(localStorage.getItem('vaccine_children')) || [];
         const childSelect = document.getElementById('childSelect');
         const bookBtn = document.getElementById('bookBtn');
 
         if (children.length === 0) {
             childSelect.innerHTML = '<option value="">الرجاء إضافة طفل من الكتيب الإلكتروني أولاً</option>';
-            bookBtn.disabled = true; // إيقاف الزر إذا لم يكن هناك أطفال
+            bookBtn.disabled = true;
             bookBtn.style.background = '#cbd5e1';
             bookBtn.innerText = 'أضيفي طفلاً لتتمكني من الحجز';
         } else {
@@ -87,32 +105,25 @@
             });
         }
 
-        // 2. إعداد المواعيد المتاحة (محاكاة لقاعدة البيانات)
-        // إذا لم تكن المواعيد مخزنة مسبقاً، سنقوم بإنشائها بأرقام طلبتها الأستاذة
-        let availableAppointments = JSON.parse(localStorage.getItem('available_appointments')) || [
-            { id: 1, vaccine: 'شلل الأطفال', date: '12 مايو 2026', spots: 10 },
-            { id: 2, vaccine: 'الحصبة (MMR)', date: '15 مايو 2026', spots: 5 },
-            { id: 3, vaccine: 'الدرن (BCG)', date: '20 مايو 2026', spots: 15 },
-            { id: 4, vaccine: 'التهاب الكبد', date: '25 مايو 2026', spots: 2 } // أماكن قليلة للتجربة
-        ];
-
-        // 3. عرض المواعيد في الجدول
-        function renderAppointments() {
+        // 3. دالة تحديث المواعيد بناءً على المركز المختارة
+        function updateAppointmentsByCenter() {
+            const selectedCenter = document.getElementById('centerSelect').value;
+            const appointments = centerData[selectedCenter];
             const tbody = document.getElementById('appointmentsList');
+            const label = document.getElementById('vaccineLabel');
+            
+            label.innerHTML = `<i class="fa-solid fa-location-dot" style="color:#ef4444;"></i> مواعيد ${selectedCenter}:`;
             tbody.innerHTML = '';
             
-            availableAppointments.forEach(app => {
-                // تلوين الأماكن المتبقية (أحمر إذا كانت قليلة، أخضر إذا كانت كثيرة)
+            appointments.forEach(app => {
                 let spotsColorClass = app.spots > 3 ? 'status-done' : (app.spots > 0 ? 'status-upcoming' : '');
                 let spotsStyle = app.spots === 0 ? 'background:#fee2e2; color:#ef4444; padding:4px 10px; border-radius:20px; font-weight:bold;' : '';
                 let spotsText = app.spots === 0 ? 'ممتلئ' : app.spots;
-                
-                // تعطيل زر الاختيار إذا كان العدد صفر
                 let disabledAttr = app.spots === 0 ? 'disabled' : '';
 
                 tbody.innerHTML += `
                     <tr>
-                        <td><input type="radio" name="appointment" value="${app.id}" ${disabledAttr} required style="width: auto; margin: 0 auto; display: block;"></td>
+                        <td><input type="radio" name="appointment" value="${app.id}" data-vaccine="${app.vaccine}" data-date="${app.date}" ${disabledAttr} required style="width: auto; margin: 0 auto; display: block;"></td>
                         <td><strong>${app.vaccine}</strong></td>
                         <td>${app.date}</td>
                         <td><span class="${spotsColorClass}" style="${spotsStyle}">${spotsText}</span></td>
@@ -121,10 +132,9 @@
             });
         }
 
-        // 4. تنفيذ عملية الحجز عند الضغط على الزر
+        // 4. تنفيذ الحجز
         document.getElementById('bookingForm').addEventListener('submit', function(e) {
-            e.preventDefault(); // منع إعادة تحميل الصفحة
-            
+            e.preventDefault();
             const selectedChild = childSelect.value;
             const selectedRadio = document.querySelector('input[name="appointment"]:checked');
 
@@ -133,25 +143,14 @@
                 return;
             }
 
-            const appId = parseInt(selectedRadio.value);
-            const appIndex = availableAppointments.findIndex(a => a.id === appId);
-
-            // إنقاص عدد الأماكن المتبقية
-            if (availableAppointments[appIndex].spots > 0) {
-                availableAppointments[appIndex].spots -= 1;
-                
-                // حفظ التحديث في الذاكرة
-                localStorage.setItem('available_appointments', JSON.stringify(availableAppointments));
-                
-                alert(`🎉 تم تأكيد الحجز بنجاح للطفل: ${selectedChild}\nللتطعيم: ${availableAppointments[appIndex].vaccine}\nفي موعد: ${availableAppointments[appIndex].date}`);
-                
-                // إعادة رسم الجدول ليرى المستخدم الرقم الجديد
-                renderAppointments();
-            }
+            const vaccineName = selectedRadio.getAttribute('data-vaccine');
+            const vaccineDate = selectedRadio.getAttribute('data-date');
+            
+            alert(`🎉 تم تأكيد الحجز بنجاح!\nالطفل: ${selectedChild}\nالمركز: ${document.getElementById('centerSelect').value}\nالتطعيم: ${vaccineName}\nالموعد: ${vaccineDate}`);
         });
 
-        // تشغيل عرض المواعيد عند فتح الصفحة
-        renderAppointments();
+        // تشغيل العرض الأولي عند فتح الصفحة
+        updateAppointmentsByCenter();
     </script>
 </body>
 </html>
