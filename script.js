@@ -197,5 +197,17 @@ document.getElementById('centerSelect').addEventListener('change', function() {
         `;
     }
 });
+function addChild() {
+    const birthDate = new Date(document.getElementById('birthDate').value);
+    const currentYear = new Date().getFullYear(); // سيجلب 2026
+
+    if (birthDate.getFullYear() > currentYear) {
+        alert("خطأ: لا يمكن تسجيل طفل بتاريخ ميلاد مستقبلي (2027 وما فوق)!");
+        return; // توقيف العملية
+    }
+    
+    // تكملة كود الإضافة الطبيعي...
+}
+
 
 
