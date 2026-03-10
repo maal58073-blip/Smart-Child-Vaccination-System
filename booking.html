@@ -42,6 +42,16 @@
                 max-width: 95% !important;
             }
         }
+        select {
+    width: 100% !important; /* ضمان أخذ العرض الكامل للكرت */
+    padding: 12px 15px !important; /* مساحة كافية للضغط بالإصبع */
+    font-size: 16px !important; /* لمنع الزووم التلقائي في الآيفون عند الضغط */
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    background-color: #fff;
+    cursor: pointer;
+    appearance: auto; /* إظهار سهم الاختيار بشكل طبيعي */
+}
     </style>
 </head>
 <body>
@@ -101,3 +111,4 @@
     <script src="script.js"></script>
 </body>
 </html>
+
