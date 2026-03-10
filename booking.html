@@ -2,184 +2,99 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>حجز موعد تطعيم</title>
+    <title>حجز موعد - منظومة التطعيمات</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <header class="top-header">
-        <h1>منظومة التطعيمات <i class="fa-solid fa-shield-halved"></i></h1>
-        <p>نهتم بمستقبل أطفالكم من خلال توفير رعاية صحية ذكية.</p>
         <nav>
             <a href="index.html">الرئيسية</a>
             <a href="booking.html" class="active">حجز موعد</a>
             <a href="dashboard.html">الكتيب الإلكتروني</a>
-            <a href="contact.html">تواصل معنا</a>
         </nav>
     </header>
 
     <div class="container">
         <div class="card">
-            <h2><i class="fa-regular fa-calendar-check" style="color: #4f46e5;"></i> حجز موعد جديد</h2>
-            <p style="margin-bottom: 20px; color: #64748b;">الرجاء اختيار الطفل والمركز الصحي، ثم تحديد الموعد المناسب من الجدول.</p>
-
+            <h2>حجز موعد تطعيم</h2>
             <form id="bookingForm">
                 <div class="form-group">
                     <label>اسم الطفل:</label>
                     <select id="childSelect" required></select>
                 </div>
-
                 <div class="form-group">
                     <label>المركز الصحي:</label>
-                    <select id="centerSelect" required onchange="updateAppointmentsByCenter()">
-                        <option value="الفويهات">مركز الفويهات الصحي</option>
-                        <option value="الكيش">مجمع عيادات الكيش</option>
-                        <option value="الماجوري">المركز الصحي الماجوري</option>
-                        <option value="سيدي حسين">مركز سيدي حسين</option>
-                    </select>
+                    <select id="centerSelect" required onchange="updateVaccines()"></select>
                 </div>
-
-                <div class="form-group">
-                    <label id="vaccineLabel">المواعيد المتاحة في المركز:</label>
-                    <div class="table-responsive">
-                        <table class="vaccine-table">
-                            <thead>
-                                <tr>
-                                    <th>اختيار</th>
-                                    <th>التطعيم</th>
-                                    <th>التاريخ المتوفر</th>
-                                    <th>الأماكن المتبقية</th>
-                                </tr>
-                            </thead>
-                            <tbody id="appointmentsList"></tbody>
-                        </table>
-                    </div>
+                <div class="table-responsive">
+                    <table class="vaccine-table">
+                        <thead>
+                            <tr><th>اختيار</th><th>التطعيم</th><th>التاريخ</th><th>الأماكن</th></tr>
+                        </thead>
+                        <tbody id="appointmentsList"></tbody>
+                    </table>
                 </div>
-
-                <button type="submit" id="bookBtn" class="btn">تأكيد الحجز ✔️</button>
+                <button type="submit" class="btn">تأكيد الحجز</button>
             </form>
         </div>
     </div>
 
-    <footer>
-        <p>جميع الحقوق محفوظة &copy; 2026 - منظومة صغارنا للتطعيمات</p>
-        <p>بنغازي - ليبيا | حماية أطفالنا مسؤوليتنا <i class="fa-solid fa-heart" style="color:#ef4444;"></i></p>
-    </footer>
-
+    <script src="script.js"></script>
     <script>
-        // 1. بيانات التطعيمات المتاحة لكل مركز (طلب الأستاذة الأساسي)
+        // بيانات المراكز (التغيير الديناميكي)
         const centerData = {
-            "الفويهات": [
-                { id: 101, vaccine: 'شلل الأطفال', date: '12 مايو 2026', spots: 8 },
-                { id: 102, vaccine: 'الحصبة (MMR)', date: '15 مايو 2026', spots: 4 }
-            ],
-            "الكيش": [
-                { id: 201, vaccine: 'الدرن (BCG)', date: '20 مايو 2026', spots: 12 },
-                { id: 202, vaccine: 'الثلاثي البكتيري', date: '22 مايو 2026', spots: 6 }
-            ],
-            "الماجوري": [
-                { id: 301, vaccine: 'التهاب الكبد', date: '25 مايو 2026', spots: 15 },
-                { id: 302, vaccine: 'شلل الأطفال', date: '28 مايو 2026', spots: 2 }
-            ],
-            "سيدي حسين": [
-                { id: 401, vaccine: 'الحصبة الألمانية', date: '01 يونيو 2026', spots: 10 },
-                { id: 402, vaccine: 'المكورات الرئوية', date: '05 يونيو 2026', spots: 5 }
-            ]
+            "الفويهات": [{id:1, v:"شلل الأطفال", d:"2026-05-10", s:5}],
+            "الكيش": [{id:2, v:"الثلاثي الفيروسي", d:"2026-05-15", s:3}],
+            "الماجوري": [{id:3, v:"التهاب الكبد", d:"2026-05-20", s:10}]
         };
 
-        // 2. جلب بيانات الأطفال
-        const children = JSON.parse(localStorage.getItem('vaccine_children')) || [];
-        const childSelect = document.getElementById('childSelect');
-        const bookBtn = document.getElementById('bookBtn');
-
-        if (children.length === 0) {
-            childSelect.innerHTML = '<option value="">الرجاء إضافة طفل من الكتيب الإلكتروني أولاً</option>';
-            bookBtn.disabled = true;
-            bookBtn.style.background = '#cbd5e1';
-            bookBtn.innerText = 'أضيفي طفلاً لتتمكني من الحجز';
-        } else {
-            childSelect.innerHTML = '<option value="">-- اختاري الطفل --</option>';
-            children.forEach(child => {
-                childSelect.innerHTML += `<option value="${child.name}">${child.name}</option>`;
-            });
-        }
-
-        // 3. دالة تحديث المواعيد بناءً على المركز المختارة
-        function updateAppointmentsByCenter() {
-            const selectedCenter = document.getElementById('centerSelect').value;
-            const appointments = centerData[selectedCenter];
-            const tbody = document.getElementById('appointmentsList');
-            const label = document.getElementById('vaccineLabel');
-            
-            label.innerHTML = `<i class="fa-solid fa-location-dot" style="color:#ef4444;"></i> مواعيد ${selectedCenter}:`;
-            tbody.innerHTML = '';
-            
-            appointments.forEach(app => {
-                let spotsColorClass = app.spots > 3 ? 'status-done' : (app.spots > 0 ? 'status-upcoming' : '');
-                let spotsStyle = app.spots === 0 ? 'background:#fee2e2; color:#ef4444; padding:4px 10px; border-radius:20px; font-weight:bold;' : '';
-                let spotsText = app.spots === 0 ? 'ممتلئ' : app.spots;
-                let disabledAttr = app.spots === 0 ? 'disabled' : '';
-
-                tbody.innerHTML += `
-                    <tr>
-                        <td><input type="radio" name="appointment" value="${app.id}" data-vaccine="${app.vaccine}" data-date="${app.date}" ${disabledAttr} required style="width: auto; margin: 0 auto; display: block;"></td>
-                        <td><strong>${app.vaccine}</strong></td>
-                        <td>${app.date}</td>
-                        <td><span class="${spotsColorClass}" style="${spotsStyle}">${spotsText}</span></td>
-                    </tr>
-                `;
-            });
-        }
-
-        // 4. تنفيذ الحجز
-        document.getElementById('bookingForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const selectedChild = childSelect.value;
-            const selectedRadio = document.querySelector('input[name="appointment"]:checked');
-
-            if (!selectedChild) {
-                alert("الرجاء اختيار الطفل أولاً!");
-                return;
+        function populateCenters() {
+            const select = document.getElementById('centerSelect');
+            select.innerHTML = '<option value="">-- اختر المركز --</option>';
+            for(let center in centerData) {
+                select.innerHTML += `<option value="${center}">${center}</option>`;
             }
+        }
 
-            const vaccineName = selectedRadio.getAttribute('data-vaccine');
-            const vaccineDate = selectedRadio.getAttribute('data-date');
-            
-            alert(`🎉 تم تأكيد الحجز بنجاح!\nالطفل: ${selectedChild}\nالمركز: ${document.getElementById('centerSelect').value}\nالتطعيم: ${vaccineName}\nالموعد: ${vaccineDate}`);
+        function updateVaccines() {
+            const center = document.getElementById('centerSelect').value;
+            const tbody = document.getElementById('appointmentsList');
+            tbody.innerHTML = '';
+            if(centerData[center]) {
+                centerData[center].forEach(app => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><input type="radio" name="app" value="${app.id}" data-v="${app.v}" data-d="${app.d}" required></td>
+                            <td>${app.v}</td><td>${app.d}</td><td>${app.s}</td>
+                        </tr>`;
+                });
+            }
+        }
+
+        // جلب الأطفال من الذاكرة
+        const children = JSON.parse(localStorage.getItem('vaccine_children')) || [];
+        const cSelect = document.getElementById('childSelect');
+        children.forEach(c => cSelect.innerHTML += `<option value="${c.name}">${c.name}</option>`);
+
+        document.getElementById('bookingForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const radio = document.querySelector('input[name="app"]:checked');
+            const newBooking = {
+                child: cSelect.value,
+                vaccine: radio.getAttribute('data-v'),
+                date: radio.getAttribute('data-d'),
+                center: document.getElementById('centerSelect').value,
+                taken: false
+            };
+            let bookings = JSON.parse(localStorage.getItem('sysBookings')) || [];
+            bookings.push(newBooking);
+            localStorage.setItem('sysBookings', JSON.stringify(bookings));
+            alert("تم الحجز بنجاح!");
+            window.location.href = "dashboard.html";
         });
-// تنفيذ الحجز والربط بالكتيب
-document.getElementById('bookingForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const selectedChild = document.getElementById('childSelect').value;
-    const selectedRadio = document.querySelector('input[name="appointment"]:checked');
-    const selectedCenter = document.getElementById('centerSelect').value;
 
-    if (!selectedChild) {
-        alert("الرجاء اختيار الطفل أولاً!");
-        return;
-    }
-
-    const newBooking = {
-        child: selectedChild,
-        vaccine: selectedRadio.getAttribute('data-vaccine'),
-        date: selectedRadio.getAttribute('data-date'),
-        center: selectedCenter,
-        taken: false // الحالة الافتراضية
-    };
-
-    // حفظ في الذاكرة المشتركة
-    let bookings = JSON.parse(localStorage.getItem('sysBookings')) || [];
-    bookings.push(newBooking);
-    localStorage.setItem('sysBookings', JSON.stringify(bookings));
-
-    alert(`✅ تم الحجز بنجاح!\nسيتم نقلك الآن لكتيب الطفل.`);
-    window.location.href = 'dashboard.html'; // الانتقال التلقائي
-});
-        // تشغيل العرض الأولي عند فتح الصفحة
-        updateAppointmentsByCenter();
-        
+        populateCenters();
     </script>
 </body>
 </html>
-
