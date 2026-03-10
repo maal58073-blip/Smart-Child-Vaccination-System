@@ -24,7 +24,15 @@
             <h2 style="color: var(--primary); margin-bottom: 10px;">مرحباً بكِ يا أمي 🌸</h2>
             <p style="color: var(--text-main); margin-bottom: 20px;">يمكنكِ إضافة أطفالك ومتابعة تطعيماتهم من هنا.</p>
             <button id="addChildBtn" class="btn" style="background-color: var(--success); max-width: 300px; margin: 0 auto;">
-                <i class="fa-solid fa-plus-circle"></i> إضافة طفل جديد
+               <div class="form-group no-print" id="addChildForm" style="display:none; background:#f1f5f9; padding:20px; border-radius:15px; margin-top:15px;">
+    <label>الاسم الثلاثي للطفل:</label>
+    <input type="text" id="newChildName" placeholder="أدخلي الاسم الثلاثي">
+    
+    <label style="margin-top:10px; display:block;">تاريخ الميلاد:</label>
+    <input type="date" id="birthDate" max="2026-12-31" style="width: 100%; padding: 12px; margin-bottom:15px;">
+    
+    <button onclick="saveNewChild()" class="btn btn-success">حفظ الطفل</button>
+</div>
             </button>
         </div>
 
@@ -171,3 +179,4 @@
     </script>
 </body>
 </html>
+
