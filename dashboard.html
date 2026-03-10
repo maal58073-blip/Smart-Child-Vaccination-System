@@ -2,88 +2,172 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>الكتيب الإلكتروني الرسمي</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الكتيب الإلكتروني - منظومة التطعيمات</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        @media print {
-            body * { visibility: hidden; }
-            .print-area, .print-area * { visibility: visible; }
-            .print-area { position: absolute; left: 0; top: 0; width: 100%; }
-            .no-print { display: none !important; }
-            .official-header { display: block !important; text-align: center; border-bottom: 2px solid #000; padding: 10px; margin-bottom: 20px; }
-            h2.mom-greeting { display: none !important; }
-        }
-        .official-header { display: none; }
-        .status-done { color: green; font-weight: bold; }
-    </style>
 </head>
 <body>
     <header class="top-header no-print">
-        <h1>منظومة التطعيمات</h1>
-        <nav><a href="booking.html">حجز موعد</a></nav>
+        <h1>منظومة التطعيمات <i class="fa-solid fa-shield-halved"></i></h1>
+        <p>الكتيب الإلكتروني الخاص بأطفالك</p>
     </header>
 
+    <nav class="no-print">
+        <a href="index.html">الرئيسية</a>
+        <a href="booking.html">حجز موعد</a>
+        <a href="dashboard.html" class="active">الكتيب الإلكتروني</a>
+    </nav>
+
     <div class="container">
-        <div class="card">
-            <h2 class="mom-greeting">مرحباً بكِ يا أمي 🌸</h2>
-            <button id="addChildBtn" class="btn no-print" style="background:#10b981;">إضافة طفل جديد (اسم ثلاثي)</button>
-            <div id="childrenList"></div>
+        <div class="card dashboard-card no-print">
+            <h2 style="color: var(--primary); margin-bottom: 10px;">مرحباً بكِ يا أمي 🌸</h2>
+            <p style="color: var(--text-main); margin-bottom: 20px;">يمكنكِ إضافة أطفالك ومتابعة تطعيماتهم من هنا.</p>
+            <button id="addChildBtn" class="btn" style="background-color: var(--success); max-width: 300px; margin: 0 auto;">
+                <i class="fa-solid fa-plus-circle"></i> إضافة طفل جديد
+            </button>
         </div>
+
+        <div id="childrenList" class="children-container"></div>
     </div>
 
     <script>
+        // جلب البيانات الأساسية
         let children = JSON.parse(localStorage.getItem('vaccine_children')) || [];
         let bookings = JSON.parse(localStorage.getItem('sysBookings')) || [];
 
-        function render() {
+        function renderDashboard() {
             const list = document.getElementById('childrenList');
             list.innerHTML = '';
+
             children.forEach((child, index) => {
+                // جلب حجوزات هذا الطفل فقط
                 const childBookings = bookings.filter(b => b.child === child.name);
-                const sectionId = `child-${index}`;
-                list.innerHTML += `
-                    <div class="child-card print-area" id="${sectionId}" style="border:1px solid #ddd; padding:20px; margin-top:20px; border-radius:10px;">
-                        <div class="official-header">
-                            <h3>دولة ليبيا - وزارة الصحة</h3>
-                            <h4>كتيب التطعيم الإلكتروني الرسمي</h4>
-                            <p>تاريخ الاستخراج: ${new Date().toLocaleDateString('ar-LY')}</p>
-                        </div>
-                        <h3>الطفل: ${child.name}</h3>
-                        <p>تاريخ الميلاد: ${child.birthDate}</p>
-                        <table border="1" style="width:100%; border-collapse:collapse;">
-                            <thead><tr><th>التطعيم</th><th>المركز</th><th>التاريخ</th><th>الحالة</th></tr></thead>
+                const sectionId = `print-area-${index}`;
+
+                // إنشاء كرت الطفل بنفس تصميم الـ CSS الخاص بك
+                const card = document.createElement('div');
+                card.className = 'child-card print-section';
+                card.id = sectionId;
+                
+                let bookingsHTML = childBookings.map((b, bIndex) => `
+                    <tr>
+                        <td>${b.vaccine}</td>
+                        <td>${b.center}</td>
+                        <td>${b.date}</td>
+                        <td><span class="${b.taken ? 'status-done' : 'status-upcoming'}">${b.taken ? '✔️ تم' : '⏳ قادم'}</span></td>
+                        <td class="no-print">
+                            ${!b.taken ? `<button onclick="markAsDone('${child.name}', '${b.vaccine}')" class="btn-small btn-success">تحديث (تم)</button>` : '-'}
+                        </td>
+                    </tr>
+                `).join('');
+
+                card.innerHTML = `
+                    <div class="official-header">
+                        <h2>دولة ليبيا - وزارة الصحة</h2>
+                        <h3>كتيب التطعيم الإلكتروني الرسمي</h3>
+                        <p>تاريخ الاستخراج: ${new Date().toLocaleDateString('ar-LY')}</p>
+                    </div>
+
+                    <div class="child-info">
+                        <h3><i class="fa-solid fa-baby" style="color:var(--primary);"></i> الطفل: ${child.name}</h3>
+                        <button onclick="deleteChild(${index})" class="btn-small btn-danger no-print"><i class="fa-solid fa-trash"></i> حذف</button>
+                    </div>
+                    <p style="color: var(--text-main); margin-bottom: 15px;"><strong>تاريخ الميلاد:</strong> ${child.birthDate}</p>
+
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>التطعيم</th>
+                                    <th>المركز</th>
+                                    <th>التاريخ</th>
+                                    <th>الحالة</th>
+                                    <th class="no-print">الإجراء</th>
+                                </tr>
+                            </thead>
                             <tbody>
-                                <tr><td>تطعيم الولادة</td><td>المركز الرئيسي</td><td>${child.birthDate}</td><td>تم الأخذ</td></tr>
-                                ${childBookings.map(b => `<tr><td>${b.vaccine}</td><td>${b.center}</td><td>${b.date}</td><td>${b.taken?'✅':'⏳'}</td></tr>`).join('')}
+                                <tr>
+                                    <td>تطعيم الولادة</td>
+                                    <td>المركز الرئيسي</td>
+                                    <td>${child.birthDate}</td>
+                                    <td><span class="status-done">✔️ تم</span></td>
+                                    <td class="no-print">-</td>
+                                </tr>
+                                ${bookingsHTML}
                             </tbody>
                         </table>
-                        <button onclick="printChild('${sectionId}')" class="btn-small no-print" style="margin-top:10px; background:#4f46e5; color:white; cursor:pointer; padding:5px 10px;">تحميل الكتيب PDF (هذا الطفل فقط)</button>
-                    </div>`;
+                    </div>
+                    
+                    <button onclick="printChild('${sectionId}')" class="btn btn-small no-print" style="margin-top: 20px; background-color: var(--dark-bg); max-width: 200px;">
+                        <i class="fa-solid fa-print"></i> طباعة الكتيب
+                    </button>
+                `;
+                list.appendChild(card);
             });
         }
 
+        // 1. إضافة طفل مع التحقق من الاسم الثلاثي والتاريخ
         document.getElementById('addChildBtn').addEventListener('click', () => {
             const name = prompt("أدخلي الاسم الثلاثي للطفل:");
-            if(!name || name.trim().split(/\s+/).length < 3) return alert("خطأ: يجب إدخال اسم ثلاثي!");
+            if (!name) return;
             
-            const dob = prompt("أدخلي تاريخ الميلاد (YYYY-MM-DD):");
-            if(new Date(dob) > new Date()) return alert("خطأ: التاريخ في المستقبل!");
+            if (name.trim().split(/\s+/).length < 3) {
+                alert("❌ خطأ: يجب إدخال الاسم ثلاثياً (الاسم، اسم الأب، اللقب).");
+                return;
+            }
 
-            children.push({name, birthDate: dob});
+            const dob = prompt("أدخلي تاريخ الميلاد (YYYY-MM-DD):");
+            if (!dob) return;
+
+            const inputDate = new Date(dob);
+            const today = new Date();
+            today.setHours(0,0,0,0);
+
+            if (inputDate > today) {
+                alert("❌ خطأ: تاريخ الميلاد لا يمكن أن يكون في المستقبل!");
+                return;
+            }
+
+            children.push({ name: name, birthDate: dob });
             localStorage.setItem('vaccine_children', JSON.stringify(children));
-            render();
+            renderDashboard();
         });
 
-        window.printChild = (id) => {
-            const all = document.querySelectorAll('.print-area');
-            all.forEach(s => s.classList.add('no-print'));
-            document.getElementById(id).classList.remove('no-print');
-            window.print();
-            all.forEach(s => s.classList.remove('no-print'));
+        // 2. تحديث حالة التطعيم إلى "تم"
+        window.markAsDone = (childName, vaccineName) => {
+            bookings = bookings.map(b => {
+                if (b.child === childName && b.vaccine === vaccineName) {
+                    return { ...b, taken: true };
+                }
+                return b;
+            });
+            localStorage.setItem('sysBookings', JSON.stringify(bookings));
+            renderDashboard();
         };
 
-        render();
+        // 3. حذف طفل
+        window.deleteChild = (index) => {
+            if (confirm("هل أنتِ متأكدة من حذف السجل نهائياً؟")) {
+                const childName = children[index].name;
+                children.splice(index, 1);
+                bookings = bookings.filter(b => b.child !== childName); // حذف حجوزاته أيضاً
+                localStorage.setItem('vaccine_children', JSON.stringify(children));
+                localStorage.setItem('sysBookings', JSON.stringify(bookings));
+                renderDashboard();
+            }
+        };
+
+        // 4. طباعة طفل واحد فقط
+        window.printChild = (sectionId) => {
+            const allSections = document.querySelectorAll('.print-section');
+            allSections.forEach(s => s.classList.add('no-print')); // إخفاء الكل
+            document.getElementById(sectionId).classList.remove('no-print'); // إظهار المطلوب فقط
+            window.print();
+            allSections.forEach(s => s.classList.remove('no-print')); // إعادة الوضع الطبيعي بعد الطباعة
+        };
+
+        renderDashboard();
     </script>
 </body>
 </html>
