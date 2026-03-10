@@ -193,3 +193,81 @@ function populateChildSelect() {
         childSelect.appendChild(option);
     });
 }
+// ==========================================
+// المرحلة الثالثة: نظام المشرف (Admin Panel)
+// ==========================================
+
+function adminLogin() {
+    // طلب كلمة المرور من المستخدم
+    const password = prompt("الرجاء إدخال كلمة مرور المشرف:");
+    
+    // كلمة المرور الافتراضية (يمكنكِ تغييرها)
+    if (password === "2026") {
+        showAdminPanel();
+    } else {
+        alert("عذراً، كلمة المرور غير صحيحة!");
+    }
+}
+
+function showAdminPanel() {
+    // إنشاء واجهة تحكم مؤقتة تظهر فوق الصفحة
+    const adminHTML = `
+        <div id="adminModal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; display:flex; justify-content:center; align-items:center;">
+            <div class="card" style="max-width:500px; text-align:right; position:relative;">
+                <button onclick="document.getElementById('adminModal').remove()" style="width:auto; position:absolute; top:10px; left:10px; background:red; padding:5px 10px;">X</button>
+                <h2><i class="fa-solid fa-user-gear"></i> لوحة تحكم المشرف</h2>
+                <hr style="margin:15px 0;">
+                <p>تعديل كميات التطعيمات في المراكز:</p>
+                
+                <div class="form-group" style="margin-top:15px;">
+                    <label>اختر المركز:</label>
+                    <select id="adminCenterSelect" onchange="loadAdminVaccines()">
+                        <option value="" disabled selected>-- اختر المركز --</option>
+                        <option value="مركز بنغازي الطبي">مركز بنغازي الطبي</option>
+                        <option value="مركز سيدي يونس الصحي">مركز سيدي يونس الصحي</option>
+                    </select>
+                </div>
+
+                <div id="vaccineEditArea">
+                    </div>
+                
+                <button class="btn btn-success" style="margin-top:15px;" onclick="saveAdminChanges()">حفظ التعديلات النهائية</button>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', adminHTML);
+}
+
+// دالة لتحميل تطعيمات المركز المختار داخل لوحة التحكم
+function loadAdminVaccines() {
+    const center = document.getElementById('adminCenterSelect').value;
+    const editArea = document.getElementById('vaccineEditArea');
+    const vaccines = centersData[center] || [];
+    
+    let html = '';
+    vaccines.forEach((v, index) => {
+        html += `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; background:#f8fafc; padding:10px; border-radius:8px;">
+                <span>${v.name}</span>
+                <input type="number" value="${v.count}" id="vac_count_${index}" style="width:80px; padding:5px;">
+            </div>
+        `;
+    });
+    editArea.innerHTML = html;
+}
+
+// دالة لحفظ التعديلات التي قام بها المشرف
+function saveAdminChanges() {
+    const center = document.getElementById('adminCenterSelect').value;
+    const vaccines = centersData[center] || [];
+    
+    vaccines.forEach((v, index) => {
+        const newCount = document.getElementById(`vac_count_${index}`).value;
+        v.count = parseInt(newCount);
+    });
+    
+    alert("تم تحديث قاعدة بيانات المراكز بنجاح!");
+    document.getElementById('adminModal').remove();
+}
+
+
