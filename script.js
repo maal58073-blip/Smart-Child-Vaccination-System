@@ -23,13 +23,26 @@ document.addEventListener('change', function(e) {
         const vaccines = centersData[center] || [];
         let tableHTML = `<p><b>المواعيد المتاحة في ${center}:</b></p>
             <div class="table-wrapper">
-                <table>
-                    <thead>
-                        <tr style="background: #f1f5f9;">
-                            <th>التطعيم</th>
-                            <th>الكمية</th>
-                            <th>التاريخ</th>
-                        </tr>
+        <table>
+            <thead>
+                <tr>
+                    <th>اختيار</th>
+                    <th>التطعيم</th>
+                    <th>الكمية</th>
+                    <th>التاريخ</th>
+                </tr>
+            </thead>
+            <tbody>`;
+
+vaccines.forEach((v, index) => {
+    tableHTML += `<tr>
+        <td><input type="radio" name="selectedVaccine" value="${v.name}" id="vac_${index}"></td>
+        <td><label for="vac_${index}">${v.name}</label></td>
+        <td>${v.count}</td>
+        <td style="color:blue; font-weight:bold;">${v.date}</td>
+    </tr>`;
+});
+
                     </thead>
                     <tbody>`;
         
