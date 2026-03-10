@@ -52,6 +52,15 @@
     cursor: pointer;
     appearance: auto; /* إظهار سهم الاختيار بشكل طبيعي */
 }
+        /* حل مشكلة الحقول الضيقة على الموبايل */
+select, input[type="date"], input[type="text"] {
+    width: 100% !important; 
+    height: 50px !important; /* لسهولة الضغط بالإصبع */
+    font-size: 16px !important; 
+    padding: 10px !important;
+    display: block;
+    margin-bottom: 10px;
+}
     </style>
 </head>
 <body>
@@ -111,4 +120,5 @@
     <script src="script.js"></script>
 </body>
 </html>
+
 
