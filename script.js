@@ -127,3 +127,45 @@ function deleteChild(id) {
         displayChildren();
     }
 }
+// --- كود خاص بصفحة الحجز booking.html ---
+
+// 1. دالة لتعبئة قائمة الأطفال المسجلين في قائمة الاختيار
+function populateChildSelect() {
+    const childSelect = document.getElementById('childSelect');
+    if (!childSelect) return; // لضمان عدم حدوث خطأ في الصفحات الأخرى
+
+    const children = JSON.parse(localStorage.getItem('children')) || [];
+    
+    // مسح الخيارات القديمة (باستثناء الخيار الأول)
+    childSelect.innerHTML = '<option value="" disabled selected>-- اختر الطفل --</option>';
+
+    children.forEach(child => {
+        const option = document.createElement('option');
+        option.value = child.id;
+        option.textContent = child.name;
+        childSelect.appendChild(option);
+    });
+}
+
+// 2. دالة التعامل مع إرسال نموذج الحجز
+if (document.getElementById('bookingForm')) {
+    document.getElementById('bookingForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const childId = document.getElementById('childSelect').value;
+        const center = document.getElementById('centerSelect').value;
+
+        if (!childId || !center) {
+            alert("الرجاء اختيار الطفل والمركز الصحي!");
+            return;
+        }
+
+        alert("تم حجز الموعد بنجاح! سيتم إرسال تفاصيل الموعد لهاتفك.");
+        // يمكنك هنا إضافة منطق لتحديث حالة التطعيم في الـ LocalStorage إذا أردتِ
+    });
+}
+
+// تشغيل دالة تعبئة الأسماء عند تحميل الصفحة
+window.addEventListener('DOMContentLoaded', populateChildSelect);
+
+
