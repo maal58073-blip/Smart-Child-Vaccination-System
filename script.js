@@ -251,3 +251,15 @@ function deleteChild(id) {
         displayChildren();
     }
 }
+// دالة الطباعة المطورة مع التاريخ واليوم
+function printSpecificChild() {
+    // جلب التاريخ واليوم الحالي باللغة العربية
+    const now = new Date();
+    const optionsDate = { year: 'numeric', month: 'long', day: 'numeric' };
+    const optionsDay = { weekday: 'long' };
+    
+    document.getElementById('print-date-today').innerText = "تاريخ الإصدار: " + now.toLocaleDateString('ar-LY', optionsDate);
+    document.getElementById('print-day-today').innerText = "يوم: " + now.toLocaleDateString('ar-LY', optionsDay);
+
+    window.print();
+}
