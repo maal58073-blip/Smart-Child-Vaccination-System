@@ -167,4 +167,35 @@ function checkAdminLogin() {
         alert("كلمة المرور خاطئة!");
     }
 }
+document.getElementById('centerSelect').addEventListener('change', function() {
+    const selectedCenter = this.value;
+    const bookingDetailsArea = document.querySelector('.booking-step'); // المنطقة التي ستظهر فيها المواعيد
+
+    if (selectedCenter) {
+        // هنا نقوم بتحديث واجهة المستخدم بناءً على المركز المختار
+        // يمكنك إضافة جدول أو قائمة بالمواعيد المتوفرة لهذا المركز
+        bookingDetailsArea.innerHTML = `
+            <p style="font-weight:bold; margin-bottom:10px;">المواعيد المتاحة في ${selectedCenter}:</p>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>التطعيم</th>
+                            <th>التاريخ</th>
+                            <th>الحالة</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>شلل الأطفال</td>
+                            <td>2026-05-10</td>
+                            <td><span class="status-upcoming">متوفر</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        `;
+    }
+});
+
 
