@@ -1,4 +1,4 @@
-// 1. قاعدة بيانات المراكز والتواريخ
+// 1. قاعدة بيانات المراكز والتواريخ (محدثة)
 const centersData = {
     "مركز بنغازي الطبي": [
         { name: "شلل الأطفال", count: 50, date: "2026-03-20" },
@@ -14,7 +14,7 @@ const centersData = {
     ]
 };
 
-// تحديث جدول التطعيمات في صفحة الحجز
+// تحديث جدول التطعيمات في صفحة الحجز (مع إضافة حاوية للتمرير)
 document.addEventListener('change', function(e) {
     if (e.target && e.target.id === 'centerSelect') {
         const center = e.target.value;
@@ -22,30 +22,55 @@ document.addEventListener('change', function(e) {
         if (!infoArea) return;
 
         const vaccines = centersData[center] || [];
+        // حل مشكلة التمرير هنا بإضافة div style="overflow-x:auto"
         let tableHTML = `<p><b>المواعيد المتاحة في ${center}:</b></p>
-            <table style="width:100%; border-collapse: collapse; background: white; margin-top:10px;">
-                <thead>
-                    <tr style="background: #f1f5f9;">
-                        <th style="padding:10px; border:1px solid #ddd;">التطعيم</th>
-                        <th style="padding:10px; border:1px solid #ddd;">الكمية</th>
-                        <th style="padding:10px; border:1px solid #ddd;">التاريخ</th>
-                    </tr>
-                </thead>
-                <tbody>`;
+            <div style="overflow-x:auto; margin-top:10px; border:1px solid #ddd; border-radius:8px;">
+                <table style="width:100%; border-collapse: collapse; background: white; min-width:400px;">
+                    <thead>
+                        <tr style="background: #f1f5f9;">
+                            <th style="padding:10px; border-bottom:1px solid #ddd;">التطعيم</th>
+                            <th style="padding:10px; border-bottom:1px solid #ddd;">الكمية</th>
+                            <th style="padding:10px; border-bottom:1px solid #ddd;">التاريخ</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
         
         vaccines.forEach(v => {
             tableHTML += `<tr>
-                <td style="padding:10px; border:1px solid #ddd;">${v.name}</td>
-                <td style="padding:10px; border:1px solid #ddd;">${v.count}</td>
-                <td style="padding:10px; border:1px solid #ddd; color:blue;">${v.date}</td>
+                <td style="padding:10px; border-bottom:1px solid #ddd;">${v.name}</td>
+                <td style="padding:10px; border-bottom:1px solid #ddd;">${v.count}</td>
+                <td style="padding:10px; border-bottom:1px solid #ddd; color:blue; font-weight:bold;">${v.date}</td>
             </tr>`;
         });
-        tableHTML += `</tbody></table>`;
+        tableHTML += `</tbody></table></div>
+        <button onclick="confirmBooking()" class="btn" style="margin-top:15px; width:100%;">تأكيد الحجز لهذا المركز ✅</button>`;
         infoArea.innerHTML = tableHTML;
     }
 });
 
-// 2. إدارة بيانات الأطفال والكتيب
+// وظيفة ربط الحجز ببيانات الطفل (المطلب الجديد)
+function confirmBooking() {
+    const childId = document.getElementById('childSelect')?.value;
+    const center = document.getElementById('centerSelect')?.value;
+
+    if (!childId || !center) {
+        alert("الرجاء اختيار الطفل والمركز أولاً!");
+        return;
+    }
+
+    let children = JSON.parse(localStorage.getItem('children')) || [];
+    const childIndex = children.findIndex(c => c.id == childId);
+
+    if (childIndex !== -1) {
+        // تخزين بيانات الحجز داخل سجل الطفل
+        children[childIndex].bookingStatus = `محجوز في: ${center}`;
+        localStorage.setItem('children', JSON.stringify(children));
+        alert("تم ربط الحجز بنجاح! يمكنكِ رؤية المركز في الكتيب الآن.");
+        window.location.href = "dashboard.html";
+    }
+}
+
+// 2. إدارة بيانات الأطفال والكتيب (معدل لحل مشكلة العرض والتمرير)
 function updateVaccineStatus(childId, vaccineName) {
     let children = JSON.parse(localStorage.getItem('children')) || [];
     const childIndex = children.findIndex(c => c.id === childId);
@@ -71,10 +96,8 @@ function saveNewChild() {
         return;
     }
 
-    const birthDate = new Date(birthDateValue);
-    const today = new Date();
-    if (birthDate > today) {
-        alert("خطأ: لا يمكن إدخال تاريخ في المستقبل!");
+    if (new Date(birthDateValue) > new Date()) {
+        alert("خطأ: لا يمكن إدخال تاريخ في المستقبل (2027)! سجل طفلاً ولد بالفعل.");
         return;
     }
 
@@ -82,6 +105,7 @@ function saveNewChild() {
         id: Date.now(),
         name: name,
         birthDate: birthDateValue,
+        bookingStatus: "لا يوجد حجز نشط", // حالة افتراضية
         vaccinations: [
             { name: "عند الولادة", status: "تم أخذها", date: birthDateValue },
             { name: "شهرين", status: "قادم", date: "معلق" },
@@ -118,15 +142,25 @@ function displayChildren() {
             </tr>`;
         });
 
+        // تم تعديل الجزء التالي لحل مشكلة التمرير وإظهار المركز المحجوز فيه
         card.innerHTML = `
-            <h3>${child.name}</h3>
-            <p>تاريخ الميلاد: ${child.birthDate}</p>
-            <table>
-                <thead><tr><th>التطعيم</th><th>التاريخ</th><th>الحالة</th></tr></thead>
-                <tbody>${rows}</tbody>
-            </table>
-            <button onclick="window.print()" class="no-print">طباعة الكتيب</button>
-            <button onclick="deleteChild(${child.id})" class="no-print" style="color:red">حذف</button>
+            <div style="text-align:center; padding:10px; border-bottom:1px solid #eee;">
+                <h3 style="margin:0;">${child.name}</h3>
+                <p style="font-size:0.9rem; color:#666;">تاريخ الميلاد: ${child.birthDate}</p>
+                <p style="color:green; font-weight:bold; font-size:0.85rem;">📍 ${child.bookingStatus}</p>
+            </div>
+            
+            <div style="overflow-x:auto; width:100%; -webkit-overflow-scrolling: touch;">
+                <table style="min-width:450px; width:100%;">
+                    <thead><tr><th>التطعيم</th><th>التاريخ</th><th>الحالة</th></tr></thead>
+                    <tbody>${rows}</tbody>
+                </table>
+            </div>
+            
+            <div class="no-print" style="display:flex; gap:5px; margin-top:10px;">
+                <button onclick="window.print()" style="flex:2; background:#4f46e5; color:white; border:none; padding:8px; border-radius:5px;">طباعة الكتيب</button>
+                <button onclick="deleteChild(${child.id})" style="flex:1; background:none; color:red; border:1px solid red; border-radius:5px;">حذف</button>
+            </div>
         `;
         container.appendChild(card);
     });
@@ -145,16 +179,17 @@ function adminLogin() {
 function showAdminPanel() {
     const adminHTML = `
         <div id="adminModal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; display:flex; justify-content:center; align-items:center;">
-            <div style="background:white; padding:20px; border-radius:10px; width:400px; text-align:right;">
-                <h3>لوحة التحكم</h3>
-                <select id="adminCenterSelect" onchange="loadAdminVaccines()" style="width:100%; padding:10px; margin:10px 0;">
+            <div style="background:white; padding:20px; border-radius:10px; width:90%; max-width:400px; text-align:right;">
+                <h3 style="margin-top:0;">إدارة الكميات</h3>
+                <select id="adminCenterSelect" onchange="loadAdminVaccines()" style="width:100%; padding:10px; margin-bottom:10px;">
                     <option value="">اختر المركز لتعديله</option>
                     <option value="مركز بنغازي الطبي">مركز بنغازي الطبي</option>
                     <option value="مركز سيدي يونس الصحي">مركز سيدي يونس الصحي</option>
+                    <option value="مستشفى الأطفال">مستشفى الأطفال</option>
                 </select>
-                <div id="vaccineEditArea"></div>
-                <button onclick="saveAdminChanges()" style="background:green; color:white; padding:10px; width:100%; margin-top:10px;">حفظ</button>
-                <button onclick="document.getElementById('adminModal').remove()" style="width:100%; margin-top:5px;">إغلاق</button>
+                <div id="vaccineEditArea" style="max-height:200px; overflow-y:auto;"></div>
+                <button onclick="saveAdminChanges()" style="background:green; color:white; padding:10px; width:100%; border:none; border-radius:5px; margin-top:10px;">حفظ التعديلات</button>
+                <button onclick="document.getElementById('adminModal').remove()" style="width:100%; margin-top:5px; background:none; border:none; color:#666;">إغلاق</button>
             </div>
         </div>`;
     document.body.insertAdjacentHTML('beforeend', adminHTML);
@@ -166,7 +201,10 @@ function loadAdminVaccines() {
     const vaccines = centersData[center] || [];
     let html = '';
     vaccines.forEach((v, index) => {
-        html += `<div style="margin-bottom:5px;">${v.name}: <input type="number" value="${v.count}" id="vac_count_${index}" style="width:60px;"></div>`;
+        html += `<div style="display:flex; justify-content:space-between; margin-bottom:8px; padding:5px; background:#f9f9f9;">
+            <span>${v.name}</span>
+            <input type="number" value="${v.count}" id="vac_count_${index}" style="width:60px; text-align:center;">
+        </div>`;
     });
     editArea.innerHTML = html;
 }
@@ -177,15 +215,28 @@ function saveAdminChanges() {
     vaccines.forEach((v, index) => {
         v.count = parseInt(document.getElementById(`vac_count_${index}`).value);
     });
-    alert("تم التحديث!");
+    alert("تم تحديث المخزون بنجاح!");
     document.getElementById('adminModal').remove();
 }
 
 // تشغيل عند التحميل
 document.addEventListener('DOMContentLoaded', () => {
     displayChildren();
-    if(typeof populateChildSelect === "function") populateChildSelect();
+    populateChildSelect();
 });
+
+function populateChildSelect() {
+    const childSelect = document.getElementById('childSelect');
+    if (!childSelect) return;
+    const children = JSON.parse(localStorage.getItem('children')) || [];
+    childSelect.innerHTML = '<option value="" disabled selected>-- اختر الطفل --</option>';
+    children.forEach(child => {
+        const option = document.createElement('option');
+        option.value = child.id;
+        option.textContent = child.name;
+        childSelect.appendChild(option);
+    });
+}
 
 function toggleChildForm() {
     const form = document.getElementById('addChildForm');
@@ -193,7 +244,7 @@ function toggleChildForm() {
 }
 
 function deleteChild(id) {
-    if (confirm("حذف السجل؟")) {
+    if (confirm("حذف سجل الطفل؟")) {
         let children = JSON.parse(localStorage.getItem('children')) || [];
         children = children.filter(c => c.id !== id);
         localStorage.setItem('children', JSON.stringify(children));
