@@ -72,12 +72,18 @@ function saveNewChild() {
     const nameInput = document.getElementById('newChildName');
     const dateInput = document.getElementById('birthDate');
     const name = nameInput.value.trim();
-    const birthDateValue = dateInput.value;
+    const today = new Date().toISOString().split('T')[0]; // تاريخ اليوم
 
-    if (!name || !birthDateValue) {
-        alert("يرجى إدخال البيانات كاملة!");
-        return;
-    }
+if (!name || !birthDateValue) {
+    alert("يرجى إدخال البيانات كاملة!");
+    return;
+}
+
+if (birthDateValue > today) {
+    alert("خطأ: لا يمكن إدخال تاريخ في المستقبل! يرجى إدخال تاريخ ميلاد صحيح.");
+    return;
+}
+
 
     const newChild = {
         id: Date.now(),
