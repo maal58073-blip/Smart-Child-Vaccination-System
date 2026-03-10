@@ -1,4 +1,3 @@
-// 1. قاعدة بيانات المراكز
 const centersData = {
     "مركز بنغازي الطبي": [
         { name: "شلل الأطفال", count: 50, date: "2026-03-20" },
@@ -14,7 +13,7 @@ const centersData = {
     ]
 };
 
-// 2. تحديث جدول المواعيد في صفحة الحجز
+// 1. تحديث جدول المواعيد في صفحة الحجز
 document.addEventListener('change', function(e) {
     if (e.target && e.target.id === 'centerSelect') {
         const center = e.target.value;
@@ -47,7 +46,7 @@ document.addEventListener('change', function(e) {
     }
 });
 
-// 3. تأكيد الحجز وربط الطفل
+// 2. تأكيد الحجز وربط الطفل
 function confirmBooking() {
     const childId = document.getElementById('childSelect')?.value;
     const center = document.getElementById('centerSelect')?.value;
@@ -68,7 +67,7 @@ function confirmBooking() {
     }
 }
 
-// 4. حفظ طفل جديد
+// 3. حفظ طفل جديد
 function saveNewChild() {
     const nameInput = document.getElementById('newChildName');
     const dateInput = document.getElementById('birthDate');
@@ -77,11 +76,6 @@ function saveNewChild() {
 
     if (!name || !birthDateValue) {
         alert("يرجى إدخال البيانات كاملة!");
-        return;
-    }
-
-    if (new Date(birthDateValue) > new Date()) {
-        alert("خطأ: لا يمكن إدخال تاريخ في المستقبل!");
         return;
     }
 
@@ -107,7 +101,7 @@ function saveNewChild() {
     displayChildren();
 }
 
-// 5. عرض الأطفال في الكتيب (مع التمرير والطباعة)
+// 4. عرض الأطفال في الكتيب
 function displayChildren() {
     const container = document.getElementById('childrenCardsContainer');
     if (!container) return;
@@ -133,14 +127,12 @@ function displayChildren() {
                 <p style="font-size:0.9rem; color:#666; margin:5px 0;">تاريخ الميلاد: ${child.birthDate}</p>
                 <p style="color:green; font-weight:bold; font-size:0.85rem;">📍 ${child.bookingStatus}</p>
             </div>
-            
             <div class="table-wrapper">
                 <table>
                     <thead><tr><th>التطعيم</th><th>التاريخ</th><th>الحالة</th></tr></thead>
                     <tbody>${rows}</tbody>
                 </table>
             </div>
-            
             <div class="no-print" style="display:flex; gap:10px; margin-top:15px;">
                 <button onclick="printSpecificChild()" class="btn-small btn-success" style="flex:2;">طباعة الكتيب 🖨️</button>
                 <button onclick="deleteChild(${child.id})" class="btn-small btn-danger" style="flex:1;">حذف</button>
@@ -150,23 +142,27 @@ function displayChildren() {
     });
 }
 
-// 6. دالة الطباعة الاحترافية
+// 5. دالة الطباعة الاحترافية (محدثة لتعمل مع الهيدر الرسمي)
 function printSpecificChild() {
     const now = new Date();
     const dateStr = now.toLocaleDateString('ar-LY', { year: 'numeric', month: 'long', day: 'numeric' });
     const dayStr = now.toLocaleDateString('ar-LY', { weekday: 'long' });
     
-    // تحديث التاريخ في الهيدر المخفي قبل الطباعة
+    // تحديث التاريخ واليوم في الهيدر المخفي
     const dateElem = document.getElementById('print-date-today');
     const dayElem = document.getElementById('print-day-today');
+    const headerElem = document.getElementById('official-print-header');
     
     if(dateElem) dateElem.innerText = "بتاريخ: " + dateStr;
     if(dayElem) dayElem.innerText = "يوم: " + dayStr;
+    if(headerElem) headerElem.style.display = "block"; // إظهاره مؤقتاً للطباعة
 
     window.print();
+    
+    if(headerElem) headerElem.style.display = "none"; // إخفاؤه مجدداً بعد الطباعة
 }
 
-// 7. لوحة التحكم والإدارة
+// 6. لوحة التحكم (Admin)
 function adminLogin() {
     const pass = prompt("كلمة مرور المشرف:");
     if (pass === "2026") showAdminPanel();
@@ -215,7 +211,7 @@ function saveAdminChanges() {
     document.getElementById('adminModal').remove();
 }
 
-// 8. تشغيل وتنسيق
+// 7. تشغيل التلقائي
 document.addEventListener('DOMContentLoaded', () => {
     displayChildren();
     if (document.getElementById('childSelect')) populateChildSelect();
@@ -223,6 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function populateChildSelect() {
     const childSelect = document.getElementById('childSelect');
+    if(!childSelect) return;
     const children = JSON.parse(localStorage.getItem('children')) || [];
     childSelect.innerHTML = '<option value="" disabled selected>-- اختر الطفل --</option>';
     children.forEach(child => {
