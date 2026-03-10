@@ -166,12 +166,44 @@ footer {
     width: 100%;
 }
 
-/* الطباعة */
+/* --- إعدادات الطباعة الرسمية --- */
 @media print {
-    nav, footer, .top-header, .no-print, button, .btn { display: none !important; }
-    .container { padding: 0; }
-    .child-card { border: 2px solid #000 !important; box-shadow: none !important; margin-bottom: 30px; }
-    th { background-color: #f0f0f0 !important; color: #000 !important; }
+    /* 1. إظهار الهيدر الرسمي الذي أضفناه في HTML */
+    .official-header { 
+        display: block !important; 
+        visibility: visible !important;
+    }
+
+    /* 2. إخفاء العناصر غير الضرورية (الموجودة أصلاً في كودك) */
+    nav, footer, .top-header, .no-print, button, .btn { 
+        display: none !important; 
+    }
+
+    /* 3. تنسيق الصفحة لتكون رسمية وبيضاء */
+    .container { 
+        padding: 0 !important; 
+        margin: 0 !important;
+        width: 100% !important; 
+    }
+
+    /* 4. جعل الكروت واضحة وبدون ظلال ملونة */
+    .child-card { 
+        border: 2px solid #000 !important; 
+        box-shadow: none !important; 
+        margin-bottom: 30px !important;
+        page-break-inside: avoid; /* لمنع قطع الكرت بين صفحتين */
+    }
+
+    /* 5. تلوين رؤوس الجداول بالرمادي الفاتح للطباعة */
+    th { 
+        background-color: #f0f0f0 !important; 
+        color: #000 !important; 
+        border: 1px solid #000 !important;
+    }
+    
+    td { 
+        border: 1px solid #000 !important; 
+    }
 }
 
 /* الجوال */
@@ -181,3 +213,4 @@ footer {
     .child-info { flex-direction: column; align-items: center; text-align: center; gap: 10px; }
     nav a { padding: 8px 12px; font-size: 0.85rem; }
 }
+
