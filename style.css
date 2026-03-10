@@ -168,11 +168,25 @@ footer {
 
 /* --- إعدادات الطباعة الرسمية --- */
 @media print {
-    /* 1. إظهار الهيدر الرسمي الذي أضفناه في HTML */
-    .official-header { 
-        display: block !important; 
-        visibility: visible !important;
+    /* إظهار الهيدر الرسمي عند الطباعة */
+    #official-print-header {
+        display: block !important;
     }
+
+    /* هذا الأمر هو السر: يجعل كل كرت طفل يبدأ في صفحة جديدة */
+    .child-card {
+        page-break-after: always; /* فصل كل طفل في ورقة */
+        border: 1px solid #eee !important;
+        box-shadow: none !important;
+        margin: 0 !important;
+        padding: 20px !important;
+    }
+
+    .no-print {
+        display: none !important;
+    }
+}
+
 
     /* 2. إخفاء العناصر غير الضرورية (الموجودة أصلاً في كودك) */
     nav, footer, .top-header, .no-print, button, .btn { 
