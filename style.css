@@ -86,8 +86,8 @@ nav a:hover, nav a.active { background: #e0e7ff; color: var(--primary); }
 /* --- حل مشكلة التمرير في الجوال --- */
 .table-wrapper {
     width: 100%;
-    overflow-x: auto; /* يسمح بالسحب يميناً ويساراً */
-    -webkit-overflow-scrolling: touch; /* سحب ناعم في الآيفون */
+    overflow-x: auto; 
+    -webkit-overflow-scrolling: touch; 
     margin: 15px 0;
     border: 1px solid #f1f5f9;
     border-radius: 12px;
@@ -96,7 +96,7 @@ nav a:hover, nav a.active { background: #e0e7ff; color: var(--primary); }
 table { 
     width: 100%; 
     border-collapse: collapse; 
-    min-width: 500px; /* يضمن عدم انضغاط الأعمدة */
+    min-width: 500px; 
 }
 
 th, td { padding: 12px; border-bottom: 1px solid #f1f5f9; text-align: center; }
@@ -112,30 +112,38 @@ th { background-color: var(--primary); color: white; }
 
 footer { background: var(--dark-bg); color: #94a3b8; padding: 30px; text-align: center; margin-top: auto; }
 
-/* --- إعدادات الطباعة الرسمية النظيفة --- */
+/* --- إعدادات الطباعة الرسمية النظيفة (محدثة وشاملة) --- */
 @media print {
-    .no-print, nav, footer, .top-header, .add-child-section, button { 
+    /* 1. إخفاء كل ما هو غير رسمي */
+    .no-print, nav, footer, .top-header, .add-child-section, button, .btn { 
         display: none !important; 
     }
     
     body { background: white !important; padding: 0 !important; }
     
+    /* 2. إظهار الهيدر الرسمي */
     #official-print-header { 
         display: block !important; 
+        visibility: visible !important;
         margin-bottom: 30px !important;
     }
 
+    /* 3. فصل كل طفل في صفحة مستقلة تماماً */
     .child-card { 
-        page-break-after: always; /* كل طفل في صفحة مستقلة */
+        display: block !important;
+        page-break-after: always !important; 
+        break-after: page !important;       
         border: 2px solid #333 !important;
         box-shadow: none !important;
         border-radius: 0 !important;
-        margin: 0 !important;
-        padding: 30px !important;
+        margin: 0 0 50px 0 !important;
+        padding: 40px !important;
         width: 100% !important;
     }
 
-    table { border: 1px solid #333 !important; }
+    /* 4. تنسيق الجداول للطباعة */
+    .table-wrapper { border: none !important; overflow: visible !important; }
+    table { border: 1px solid #333 !important; min-width: 100% !important; }
     th { background: #f0f0f0 !important; color: black !important; border: 1px solid #333 !important; }
     td { border: 1px solid #333 !important; }
 }
