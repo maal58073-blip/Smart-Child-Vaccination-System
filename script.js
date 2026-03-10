@@ -1,64 +1,90 @@
-// دالة حفظ طفل جديد من الحقول المباشرة
+// --- 1. التأكد من تحميل الصفحة ---
+document.addEventListener('DOMContentLoaded', function() {
+    console.log("النظام جاهز...");
+    displayChildren(); // عرض الأطفال المخزنين عند البدء
+});
+
+// --- 2. دالة إظهار وإخفاء الفورم ---
+function toggleChildForm() {
+    const form = document.getElementById('addChildForm');
+    const btn = document.getElementById('showFormBtn');
+    if (form.style.display === 'none' || form.style.display === '') {
+        form.style.display = 'block';
+        btn.innerHTML = '<i class="fa-solid fa-times-circle"></i> إلغاء';
+        btn.style.backgroundColor = '#ef4444';
+    } else {
+        form.style.display = 'none';
+        btn.innerHTML = '<i class="fa-solid fa-plus-circle"></i> إضافة طفل جديد (اسم ثلاثي)';
+        btn.style.backgroundColor = '#10b981';
+    }
+}
+
+// --- 3. دالة الحفظ الرئيسية ---
 function saveNewChild() {
     const nameInput = document.getElementById('newChildName');
     const dateInput = document.getElementById('birthDate');
     
+    if (!nameInput || !dateInput) {
+        alert("خطأ: لم يتم العثور على حقول الإدخال في الصفحة!");
+        return;
+    }
+
     const name = nameInput.value.trim();
     const birthDate = dateInput.value;
 
-    // 1. التأكد من إدخال البيانات
     if (!name || !birthDate) {
         alert("الرجاء إدخال الاسم الثلاثي وتاريخ الميلاد!");
         return;
     }
 
-    // 2. منع مواليد 2027 وما بعدها (تحقق إضافي بالكود)
-    const selectedDate = new Date(birthDate);
-    const currentYear = new Date().getFullYear();
-    if (selectedDate.getFullYear() > currentYear) {
-        alert("خطأ: لا يمكن تسجيل تاريخ ميلاد في المستقبل!");
+    // منع تاريخ 2027
+    const year = new Date(birthDate).getFullYear();
+    if (year > 2026) {
+        alert("خطأ: لا يمكن تسجيل مواليد سنة " + year);
         return;
     }
 
-    // 3. تجهيز بيانات الطفل الجديد
+    // إنشاء الكائن للطفل مع جدول التطعيمات
     const newChild = {
-        id: Date.now(), // رقم تعريفي فريد
+        id: Date.now(),
         name: name,
         birthDate: birthDate,
         vaccinations: [
-            { name: "تطعيم عند الولادة", status: "تم أخذها", date: birthDate },
-            { name: "تطعيم الشهرين", status: "قادم", date: "سيحدد لاحقاً" },
-            { name: "تطعيم 4 أشهر", status: "قادم", date: "سيحدد لاحقاً" }
-            // يمكنك إضافة باقي الجدول هنا
+            { name: "عند الولادة (درن/كبد ب)", status: "تم أخذها", date: birthDate },
+            { name: "تطعيم شهرين", status: "قادم", date: "معلق" },
+            { name: "تطعيم 4 أشهر", status: "قادم", date: "معلق" },
+            { name: "تطعيم 6 أشهر", status: "قادم", date: "معلق" },
+            { name: "تطعيم 9 أشهر", status: "قادم", date: "معلق" },
+            { name: "تطعيم سنة", status: "قادم", date: "معلق" },
+            { name: "تطعيم سنة ونصف", status: "قادم", date: "معلق" }
         ]
     };
 
-    // 4. الحفظ في LocalStorage
+    // حفظ في الذاكرة المحلية
     let children = JSON.parse(localStorage.getItem('children')) || [];
     children.push(newChild);
     localStorage.setItem('children', JSON.stringify(children));
 
-    // 5. مسح الحقول وإخفاء الفورم
+    // تنظيف الواجهة
     nameInput.value = '';
     dateInput.value = '';
-    toggleChildForm(); // إخفاء الفورم بعد الحفظ
-
-    // 6. تحديث العرض فوراً
-    displayChildren();
+    toggleChildForm();
     
-    alert("تم حفظ بيانات الطفل بنجاح!");
+    // إعادة العرض
+    displayChildren();
+    alert("تمت إضافة " + name + " بنجاح!");
 }
 
-// دالة عرض الأطفال في الصفحة
+// --- 4. دالة عرض الكروت والجداول ---
 function displayChildren() {
     const container = document.getElementById('childrenCardsContainer');
     if (!container) return;
 
     const children = JSON.parse(localStorage.getItem('children')) || [];
-    container.innerHTML = ''; // مسح المحتوى القديم
+    container.innerHTML = '';
 
     if (children.length === 0) {
-        container.innerHTML = '<p style="text-align:center; color:#64748b;">لا يوجد أطفال مسجلين حالياً.</p>';
+        container.innerHTML = '<div class="card"><p>لا يوجد أطفال مسجلين. ابدئي بإضافة طفلك الأول!</p></div>';
         return;
     }
 
@@ -66,39 +92,25 @@ function displayChildren() {
         const card = document.createElement('div');
         card.className = 'child-card';
         
-        let tableRows = '';
+        let rows = '';
         child.vaccinations.forEach(v => {
-            const statusClass = v.status === "تم أخذها" ? "status-done" : "status-upcoming";
-            tableRows += `
-                <tr>
-                    <td>${v.name}</td>
-                    <td>${v.date}</td>
-                    <td><span class="${statusClass}">${v.status}</span></td>
-                </tr>
-            `;
+            const cls = v.status === "تم أخذها" ? "status-done" : "status-upcoming";
+            rows += `<tr><td>${v.name}</td><td>${v.date}</td><td><span class="${cls}">${v.status}</span></td></tr>`;
         });
 
         card.innerHTML = `
             <div class="child-info">
                 <h3><i class="fa-solid fa-child"></i> ${child.name}</h3>
-                <p>تاريخ الميلاد: ${child.birthDate}</p>
+                <p>تاريخ الميلاد: <strong>${child.birthDate}</strong></p>
                 <button onclick="deleteChild(${child.id})" class="btn-small btn-danger no-print">حذف</button>
             </div>
             <div class="table-responsive">
                 <table>
-                    <thead>
-                        <tr>
-                            <th>التطعيم</th>
-                            <th>التاريخ</th>
-                            <th>الحالة</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${tableRows}
-                    </tbody>
+                    <thead><tr><th>التطعيم</th><th>التاريخ</th><th>الحالة</th></tr></thead>
+                    <tbody>${rows}</tbody>
                 </table>
             </div>
-            <button onclick="window.print()" class="btn btn-small no-print" style="margin-top:10px; background:#64748b;">
+            <button onclick="window.print()" class="btn btn-small no-print" style="background:#64748b; margin-top:15px;">
                 <i class="fa-solid fa-print"></i> طباعة الكتيب
             </button>
         `;
@@ -106,15 +118,12 @@ function displayChildren() {
     });
 }
 
-// دالة الحذف
+// --- 5. دالة الحذف ---
 function deleteChild(id) {
-    if (confirm("هل أنتِ متأكدة من حذف بيانات هذا الطفل؟")) {
+    if (confirm("هل أنتِ متأكدة من حذف هذا الطفل نهائياً؟")) {
         let children = JSON.parse(localStorage.getItem('children')) || [];
         children = children.filter(c => c.id !== id);
         localStorage.setItem('children', JSON.stringify(children));
         displayChildren();
     }
 }
-
-// استدعاء العرض عند تحميل الصفحة
-document.addEventListener('DOMContentLoaded', displayChildren);
