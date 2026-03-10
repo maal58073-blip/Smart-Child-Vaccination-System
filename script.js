@@ -60,28 +60,50 @@ vaccines.forEach((v, index) => {
 });
 
 // 2. تأكيد الحجز وربط الطفل
-function confirmBooking() {
-    const childId = document.getElementById('childSelect')?.value;
-    const center = document.getElementById('centerSelect')?.value;
-    const selectedVac = document.querySelector('input[name="selectedVaccine"]:checked')?.value;
+function saveNewChild() {
+    const nameInput = document.getElementById('newChildName');
+    const dateInput = document.getElementById('birthDate');
+    const name = nameInput.value.trim();
+    const birthDateValue = dateInput.value;
 
-    if (!childId || !center || !selectedVac) {
-        alert("الرجاء اختيار الطفل، المركز، ونوع التطعيمة!");
+    // الحصول على تاريخ اليوم بدقة
+    const today = new Date().toISOString().split('T')[0];
+
+    if (!name || !birthDateValue) {
+        alert("يرجى إدخال اسم الطفل وتاريخ ميلاده!");
         return;
     }
 
-    let children = JSON.parse(localStorage.getItem('children')) || [];
-    const childIndex = children.findIndex(c => c.id == childId);
-
-    if (childIndex !== -1) {
-        // تخزين الحجز مع نوع التطعيمة المختارة
-        children[childIndex].bookingStatus = `محجوز لـ (${selectedVac}) في: ${center}`;
-        localStorage.setItem('children', JSON.stringify(children));
-        
-        alert("تم الحجز بنجاح! سيتم توجيهك الآن لطباعة الكتيب.");
-        // الانتقال التلقائي لصفحة الكتيب كما طلبتِ
-        window.location.href = "dashboard.html"; 
+    // القيد الذي طلبتِه: منع التواريخ المستقبلية (مثل 2027)
+    if (birthDateValue > today) {
+        alert("خطأ: لا يمكن تسجيل طفل بتاريخ مستقبلي! يرجى اختيار تاريخ ميلاد صحيح.");
+        return;
     }
+
+    // بقية كود الحفظ...
+    const newChild = {
+        id: Date.now(),
+        name: name,
+        birthDate: birthDateValue,
+        bookingStatus: "لا يوجد حجز نشط",
+        vaccinations: [
+            { name: "عند الولادة", status: "تم أخذها", date: birthDateValue },
+            { name: "شهرين", status: "قادم", date: "معلق" },
+            { name: "4 أشهر", status: "قادم", date: "معلق" },
+            { name: "6 أشهر", status: "قادم", date: "معلق" }
+        ]
+    };
+
+    let children = JSON.parse(localStorage.getItem('children')) || [];
+    children.push(newChild);
+    localStorage.setItem('children', JSON.stringify(children));
+    
+    // إعادة تفريغ الحقول
+    nameInput.value = '';
+    dateInput.value = '';
+    
+    displayChildren(); // تحديث العرض فوراً
+    alert("تم إضافة الطفل بنجاح! يمكنكِ الآن حجز موعد له.");
 }
 
 
