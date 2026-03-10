@@ -1,60 +1,67 @@
-// --- المرحلة الأولى: قاعدة بيانات المراكز والقيود ---
+// ==========================================
+// المرحلة الأولى: قاعدة بيانات المراكز والقيود
+// ==========================================
 
-// 1. قاعدة بيانات المراكز (تحديث النقطة الأولى)
 const centersData = {
     "مركز بنغازي الطبي": [
-        { name: "شلل الأطفال", count: 50, available: true },
-        { name: "الخماسي", count: 12, available: true },
-        { name: "الكبد البائي", count: 0, available: false }
+        { name: "شلل الأطفال", count: 50 },
+        { name: "الخماسي", count: 12 }
     ],
     "مركز سيدي يونس الصحي": [
-        { name: "الثلاثي", count: 30, available: true },
-        { name: "شلل الأطفال", count: 15, available: true },
-        { name: "الدرن", count: 2, available: true }
+        { name: "الثلاثي", count: 30 },
+        { name: "كبد ب", count: 5 }
     ],
     "مستشفى الأطفال": [
-        { name: "الحصبة", count: 100, available: true },
-        { name: "الروتا", count: 40, available: true }
+        { name: "الحصبة", count: 100 },
+        { name: "الروتا", count: 40 }
     ]
 };
 
-// 2. تحديث قائمة التطعيمات عند اختيار المركز
+// تحديث قائمة التطعيمات عند اختيار المركز (صفحة الحجز)
 document.addEventListener('change', function(e) {
     if (e.target && e.target.id === 'centerSelect') {
         const center = e.target.value;
         const infoArea = document.querySelector('.booking-step'); 
+        if (!infoArea) return;
+
         const vaccines = centersData[center] || [];
-        
-        let content = `<p style="margin-bottom:10px;"><b>التطعيمات المتوفرة في ${center}:</b></p>`;
-        content += `<div style="display: grid; grid-template-columns: 1fr; gap: 8px;">`;
-        
-        if (vaccines.length > 0) {
-            vaccines.forEach(v => {
-                const badgeClass = v.count > 0 ? 'status-done' : 'status-upcoming';
-                const statusText = v.count > 0 ? `متوفر (${v.count})` : "غير متوفر حالياً";
-                content += `
-                    <div style="background: white; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; justify-content: space-between;">
-                        <span>📍 ${v.name}</span>
-                        <span class="${badgeClass}" style="font-size: 0.75rem;">${statusText}</span>
-                    </div>`;
-            });
-        } else {
-            content += `<p style="color:red;">الرجاء اختيار مركز صحيح من القائمة.</p>`;
-        }
-        
-        content += `</div>`;
+        let content = `<p><b>التطعيمات المتوفرة في ${center}:</b></p><ul style="list-style:none; padding:0;">`;
+        vaccines.forEach(v => {
+            content += `<li style="margin-bottom:5px;">📍 ${v.name} - المتوفر: (${v.count})</li>`;
+        });
+        content += `</ul>`;
         infoArea.innerHTML = content;
     }
 });
 
-// --- 1. التأكد من تحميل الصفحة ---
+// ==========================================
+// المرحلة الثانية: تحديث حالة التطعيم داخل الكتيب
+// ==========================================
+
+function updateVaccineStatus(childId, vaccineName) {
+    let children = JSON.parse(localStorage.getItem('children')) || [];
+    const childIndex = children.findIndex(c => c.id === childId);
+    
+    if (childIndex !== -1) {
+        const vaccine = children[childIndex].vaccinations.find(v => v.name === vaccineName);
+        if (vaccine) {
+            // تبديل الحالة
+            vaccine.status = (vaccine.status === "قادم") ? "تم أخذها" : "قادم";
+            localStorage.setItem('children', JSON.stringify(children));
+            displayChildren(); // إعادة العرض فوراً
+        }
+    }
+}
+
+// ==========================================
+// الوظائف الأساسية للمنظومة
+// ==========================================
+
 document.addEventListener('DOMContentLoaded', function() {
-    console.log("النظام جاهز...");
     displayChildren(); 
     populateChildSelect();
 });
 
-// --- 2. دالة إظهار وإخفاء الفورم ---
 function toggleChildForm() {
     const form = document.getElementById('addChildForm');
     const btn = document.getElementById('showFormBtn');
@@ -70,34 +77,24 @@ function toggleChildForm() {
     }
 }
 
-// --- 3. دالة الحفظ مع قيود التاريخ الصارمة (النقطة الثانية) ---
 function saveNewChild() {
     const nameInput = document.getElementById('newChildName');
     const dateInput = document.getElementById('birthDate');
-    
     if (!nameInput || !dateInput) return;
 
     const name = nameInput.value.trim();
     const birthDateValue = dateInput.value;
 
     if (!name || !birthDateValue) {
-        alert("الرجاء إدخال الاسم الثلاثي وتاريخ الميلاد!");
+        alert("الرجاء إدخال الاسم وتاريخ الميلاد!");
         return;
     }
 
+    // قيد التاريخ (منع 2027 والمستقبل)
     const birthDate = new Date(birthDateValue);
     const today = new Date();
-    
-    // قيد منع التواريخ المستقبلية (مواليد 2027 وما بعدها)
     if (birthDate > today) {
-        alert("خطأ طبي: لا يمكن تسجيل طفل لم يولد بعد (تاريخ مستقبلي)!");
-        return;
-    }
-
-    // قيد العمر المنطقي (مثلاً لا نقبل أطفال أكبر من 15 سنة في منظومة تطعيم صغار)
-    const ageInYears = today.getFullYear() - birthDate.getFullYear();
-    if (ageInYears > 15) {
-        alert("تنبيه: هذا الطفل تجاوز سن التطعيمات الأساسية (أكبر من 15 سنة)!");
+        alert("خطأ: لا يمكن تسجيل تاريخ في المستقبل!");
         return;
     }
 
@@ -124,10 +121,9 @@ function saveNewChild() {
     dateInput.value = '';
     toggleChildForm();
     displayChildren();
-    alert("تم تسجيل الطفل " + name + " بنجاح في المنظومة.");
+    alert("تمت إضافة الطفل بنجاح.");
 }
 
-// --- 4. دالة عرض الكروت والجداول ---
 function displayChildren() {
     const container = document.getElementById('childrenCardsContainer');
     if (!container) return;
@@ -147,7 +143,13 @@ function displayChildren() {
         let rows = '';
         child.vaccinations.forEach(v => {
             const cls = v.status === "تم أخذها" ? "status-done" : "status-upcoming";
-            rows += `<tr><td>${v.name}</td><td>${v.date}</td><td><span class="${cls}">${v.status}</span></td></tr>`;
+            // جعل السطر قابل للضغط لتحديث الحالة (المرحلة الثانية)
+            rows += `
+                <tr onclick="updateVaccineStatus(${child.id}, '${v.name}')" style="cursor:pointer">
+                    <td>${v.name}</td>
+                    <td>${v.date}</td>
+                    <td><span class="${cls}">${v.status}</span></td>
+                </tr>`;
         });
 
         card.innerHTML = `
@@ -158,7 +160,7 @@ function displayChildren() {
             </div>
             <div class="table-responsive">
                 <table>
-                    <thead><tr><th>التطعيم</th><th>التاريخ</th><th>الحالة</th></tr></thead>
+                    <thead><tr><th>التطعيم</th><th>التاريخ</th><th>الحالة (اضغط للتحديث)</th></tr></thead>
                     <tbody>${rows}</tbody>
                 </table>
             </div>
@@ -170,9 +172,8 @@ function displayChildren() {
     });
 }
 
-// --- 5. دالة الحذف ---
 function deleteChild(id) {
-    if (confirm("هل أنتِ متأكدة من حذف سجل هذا الطفل؟ لا يمكن التراجع عن هذه الخطوة.")) {
+    if (confirm("هل أنتِ متأكدة؟")) {
         let children = JSON.parse(localStorage.getItem('children')) || [];
         children = children.filter(c => c.id !== id);
         localStorage.setItem('children', JSON.stringify(children));
@@ -180,26 +181,15 @@ function deleteChild(id) {
     }
 }
 
-// --- دالة تعبئة قائمة الأطفال في صفحة الحجز ---
 function populateChildSelect() {
     const childSelect = document.getElementById('childSelect');
     if (!childSelect) return;
-
     const children = JSON.parse(localStorage.getItem('children')) || [];
     childSelect.innerHTML = '<option value="" disabled selected>-- اختر الطفل --</option>';
-
     children.forEach(child => {
         const option = document.createElement('option');
         option.value = child.id;
         option.textContent = child.name;
         childSelect.appendChild(option);
-    });
-}
-
-// نموذج الحجز
-if (document.getElementById('bookingForm')) {
-    document.getElementById('bookingForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        alert("تم استلام طلب الحجز! سيتم التحقق من توفر الطعوم في المركز المختار.");
     });
 }
