@@ -2,199 +2,88 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة الأم - الكتيب الإلكتروني</title>
+    <title>الكتيب الإلكتروني الرسمي</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* تنسيقات خاصة بالطباعة (تخفي الأزرار عند الحفظ كـ PDF) */
         @media print {
-            nav, .btn, .no-print, .btn-small, header p, #addChildBtn {
-                display: none !important;
-            }
-            .container { width: 100%; margin: 0; padding: 0; }
-            .card { border: 1px solid #ccc; box-shadow: none; }
-            body { background: white; }
+            body * { visibility: hidden; }
+            .print-area, .print-area * { visibility: visible; }
+            .print-area { position: absolute; left: 0; top: 0; width: 100%; }
+            .no-print { display: none !important; }
+            .official-header { display: block !important; text-align: center; border-bottom: 2px solid #000; padding: 10px; margin-bottom: 20px; }
+            h2.mom-greeting { display: none !important; }
         }
-        .status-done { background: #dcfce7; color: #166534; padding: 5px 10px; border-radius: 15px; font-weight: bold; }
-        .status-upcoming { background: #fef9c3; color: #854d0e; padding: 5px 10px; border-radius: 15px; font-weight: bold; }
-        .status-cancel { background: #fee2e2; color: #991b1b; padding: 5px 10px; border-radius: 15px; font-weight: bold; }
+        .official-header { display: none; }
+        .status-done { color: green; font-weight: bold; }
     </style>
 </head>
 <body>
     <header class="top-header no-print">
-        <h1>منظومة التطعيمات <i class="fa-solid fa-shield-halved"></i></h1>
-        <p>نهتم بمستقبل أطفالكم من خلال توفير رعاية صحية ذكية.</p>
-        <nav>
-            <a href="index.html">الرئيسية</a>
-            <a href="booking.html">حجز موعد</a>
-            <a href="dashboard.html" class="active">الكتيب الإلكتروني</a>
-            <a href="contact.html">تواصل معنا</a>
-        </nav>
+        <h1>منظومة التطعيمات</h1>
+        <nav><a href="booking.html">حجز موعد</a></nav>
     </header>
 
     <div class="container">
-        <div id="reminderBox" style="display:none; width: 100%; max-width: 900px; background: #fef2f2; border-right: 5px solid #ef4444; padding: 15px; margin-bottom: 20px; border-radius: 10px;" class="no-print">
-            <p style="color: #b91c1c; font-weight: bold;"><i class="fa-solid fa-bell"></i> تذكير: لديكِ موعد تطعيم قادم لأحد أطفالك غداً!</p>
-        </div>
-
-        <div class="card dashboard-card">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
-                <h2>مرحباً بكِ يا أمي 🌸</h2>
-                <button onclick="window.print()" class="btn no-print" style="background: #059669; width: auto; padding: 10px 20px;">
-                    تحميل الكتيب PDF <i class="fa-solid fa-file-pdf"></i>
-                </button>
-            </div>
-            
-            <p style="margin-bottom: 20px;" class="no-print">يمكنكِ هنا متابعة الكتيب الإلكتروني وإدارة تطعيمات أطفالك بكل سهولة.</p>
-
-            <button id="addChildBtn" class="btn no-print" style="max-width: 250px; margin: 0 auto 30px auto; background-color: #10b981;">
-                <i class="fa-solid fa-plus-circle"></i> إضافة طفل جديد
-            </button>
-
-            <div id="childrenList" class="children-container">
-                </div>
+        <div class="card">
+            <h2 class="mom-greeting">مرحباً بكِ يا أمي 🌸</h2>
+            <button id="addChildBtn" class="btn no-print" style="background:#10b981;">إضافة طفل جديد (اسم ثلاثي)</button>
+            <div id="childrenList"></div>
         </div>
     </div>
 
-    <footer class="no-print">
-        <p>جميع الحقوق محفوظة &copy; 2026 - منظومة صغارنا للتطعيمات</p>
-        <p>بنغازي - ليبيا | حماية أطفالنا مسؤوليتنا <i class="fa-solid fa-heart" style="color:#ef4444;"></i></p>
-    </footer>
-
     <script>
-    // 1. جلب البيانات من الذاكرة
-    let children = JSON.parse(localStorage.getItem('vaccine_children')) || [];
-    let bookings = JSON.parse(localStorage.getItem('sysBookings')) || [];
+        let children = JSON.parse(localStorage.getItem('vaccine_children')) || [];
+        let bookings = JSON.parse(localStorage.getItem('sysBookings')) || [];
 
-    const childrenList = document.getElementById('childrenList');
-    const reminderBox = document.getElementById('reminderBox');
-
-    // 2. دالة عرض الأطفال والحجوزات
-    function renderDashboard() {
-        childrenList.innerHTML = ''; 
-
-        if (children.length === 0) {
-            childrenList.innerHTML = `
-                <div style="padding: 40px; color: #94a3b8; text-align: center;">
-                    <i class="fa-solid fa-baby" style="font-size: 3rem; opacity: 0.3;"></i>
-                    <p style="margin-top: 10px;">لا يوجد أطفال مضافون حالياً. ابدئي بإضافة طفلك الأول.</p>
-                </div>`;
-            if(reminderBox) reminderBox.style.display = 'none';
-            return;
+        function render() {
+            const list = document.getElementById('childrenList');
+            list.innerHTML = '';
+            children.forEach((child, index) => {
+                const childBookings = bookings.filter(b => b.child === child.name);
+                const sectionId = `child-${index}`;
+                list.innerHTML += `
+                    <div class="child-card print-area" id="${sectionId}" style="border:1px solid #ddd; padding:20px; margin-top:20px; border-radius:10px;">
+                        <div class="official-header">
+                            <h3>دولة ليبيا - وزارة الصحة</h3>
+                            <h4>كتيب التطعيم الإلكتروني الرسمي</h4>
+                            <p>تاريخ الاستخراج: ${new Date().toLocaleDateString('ar-LY')}</p>
+                        </div>
+                        <h3>الطفل: ${child.name}</h3>
+                        <p>تاريخ الميلاد: ${child.birthDate}</p>
+                        <table border="1" style="width:100%; border-collapse:collapse;">
+                            <thead><tr><th>التطعيم</th><th>المركز</th><th>التاريخ</th><th>الحالة</th></tr></thead>
+                            <tbody>
+                                <tr><td>تطعيم الولادة</td><td>المركز الرئيسي</td><td>${child.birthDate}</td><td>تم الأخذ</td></tr>
+                                ${childBookings.map(b => `<tr><td>${b.vaccine}</td><td>${b.center}</td><td>${b.date}</td><td>${b.taken?'✅':'⏳'}</td></tr>`).join('')}
+                            </tbody>
+                        </table>
+                        <button onclick="printChild('${sectionId}')" class="btn-small no-print" style="margin-top:10px; background:#4f46e5; color:white; cursor:pointer; padding:5px 10px;">تحميل الكتيب PDF (هذا الطفل فقط)</button>
+                    </div>`;
+            });
         }
 
-        if(reminderBox) reminderBox.style.display = 'block';
-
-        children.forEach((child, cIndex) => {
-            const card = document.createElement('div');
-            card.className = 'child-card';
-            card.style.marginBottom = "30px";
-            card.style.padding = "20px";
-            card.style.border = "1px solid #e2e8f0";
-            card.style.borderRadius = "15px";
+        document.getElementById('addChildBtn').addEventListener('click', () => {
+            const name = prompt("أدخلي الاسم الثلاثي للطفل:");
+            if(!name || name.trim().split(/\s+/).length < 3) return alert("خطأ: يجب إدخال اسم ثلاثي!");
             
-            // تصفية الحجوزات الخاصة بهذا الطفل فقط
-            const childBookings = bookings.filter(b => b.child === child.name);
+            const dob = prompt("أدخلي تاريخ الميلاد (YYYY-MM-DD):");
+            if(new Date(dob) > new Date()) return alert("خطأ: التاريخ في المستقبل!");
 
-            card.innerHTML = `
-                <div class="child-info" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; margin-bottom: 15px;">
-                    <div>
-                        <h3 style="margin:0;"><i class="fa-solid fa-baby-carriage" style="color: #4f46e5;"></i> الطفل: ${child.name}</h3>
-                        <small style="color: #64748b;">تاريخ الميلاد: ${child.birthDate}</small>
-                    </div>
-                    <button onclick="deleteChild(${cIndex})" class="btn-small no-print" style="background:#fee2e2; color:#ef4444; border:1px solid #ef4444; cursor:pointer; padding: 5px 10px; border-radius: 8px;">
-                        <i class="fa-solid fa-trash"></i> حذف السجل
-                    </button>
-                </div>
-                
-                <div class="table-responsive">
-                    <table class="vaccine-table">
-                        <thead>
-                            <tr style="background: #4f46e5; color: white;">
-                                <th>التطعيم</th>
-                                <th>المركز</th>
-                                <th>التاريخ</th>
-                                <th>الحالة</th>
-                                <th class="no-print">إجراء</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>تطعيم الولادة (BCG)</td>
-                                <td>المركز الرئيسي</td>
-                                <td>${child.birthDate}</td>
-                                <td><span class="status-done">✔️ تم الأخذ</span></td>
-                                <td class="no-print">-</td>
-                            </tr>
-                            ${childBookings.map((b, bIndex) => `
-                                <tr>
-                                    <td><strong>${b.vaccine}</strong></td>
-                                    <td>${b.center || 'غير محدد'}</td>
-                                    <td>${b.date}</td>
-                                    <td><span class="${b.taken ? 'status-done' : 'status-upcoming'}">
-                                        ${b.taken ? '✔️ تم الأخذ' : '⏳ قيد الانتظار'}
-                                    </span></td>
-                                    <td class="no-print">
-                                        ${!b.taken ? `<button onclick="markVaccineAsTaken('${b.child}', '${b.vaccine}')" class="btn-small" style="background:#dcfce7; border:1px solid #10b981; cursor:pointer;">تحديث للحالة: تم</button>` : '---'}
-                                    </td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                </div>
-            `;
-            childrenList.appendChild(card);
-        });
-    }
-
-    // 3. تحديث حالة التطعيم (تم الأخذ)
-    window.markVaccineAsTaken = (childName, vaccineName) => {
-        bookings = bookings.map(b => {
-            if(b.child === childName && b.vaccine === vaccineName) {
-                return {...b, taken: true};
-            }
-            return b;
-        });
-        localStorage.setItem('sysBookings', JSON.stringify(bookings));
-        renderDashboard();
-        alert("تم تحديث الكتيب الإلكتروني! التطعيم مسجل الآن كـ (تم الأخذ).");
-    };
-
-    // 4. إضافة طفل جديد
-    document.getElementById('addChildBtn').addEventListener('click', () => {
-        const name = prompt("أدخلي اسم الطفل بالكامل:");
-        const birthDate = prompt("أدخلي تاريخ الميلاد (YYYY-MM-DD):");
-
-        if (name && birthDate) {
-            // التحقق من التاريخ (لا يسمح بالمستقبل)
-            const inputDate = new Date(birthDate);
-            const today = new Date();
-            if (inputDate > today) {
-                alert("خطأ: لا يمكن إدخال تاريخ ميلاد في المستقبل!");
-                return;
-            }
-
-            children.push({ name: name, birthDate: birthDate });
+            children.push({name, birthDate: dob});
             localStorage.setItem('vaccine_children', JSON.stringify(children));
-            renderDashboard();
-        }
-    });
+            render();
+        });
 
-    // 5. حذف الطفل
-    window.deleteChild = (index) => {
-        if (confirm("سيتم حذف سجل الطفل وجميع تطعيماته، هل أنتِ متأكدة؟")) {
-            const childName = children[index].name;
-            children.splice(index, 1);
-            // حذف حجوزاته أيضاً
-            bookings = bookings.filter(b => b.child !== childName);
-            localStorage.setItem('vaccine_children', JSON.stringify(children));
-            localStorage.setItem('sysBookings', JSON.stringify(bookings));
-            renderDashboard();
-        }
-    };
+        window.printChild = (id) => {
+            const all = document.querySelectorAll('.print-area');
+            all.forEach(s => s.classList.add('no-print'));
+            document.getElementById(id).classList.remove('no-print');
+            window.print();
+            all.forEach(s => s.classList.remove('no-print'));
+        };
 
-    renderDashboard();
-</script>
+        render();
+    </script>
 </body>
 </html>
