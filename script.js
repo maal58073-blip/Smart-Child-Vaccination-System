@@ -63,9 +63,10 @@ vaccines.forEach((v, index) => {
 function confirmBooking() {
     const childId = document.getElementById('childSelect')?.value;
     const center = document.getElementById('centerSelect')?.value;
+    const selectedVac = document.querySelector('input[name="selectedVaccine"]:checked')?.value;
 
-    if (!childId || !center) {
-        alert("الرجاء اختيار الطفل والمركز أولاً!");
+    if (!childId || !center || !selectedVac) {
+        alert("الرجاء اختيار الطفل، المركز، ونوع التطعيمة!");
         return;
     }
 
@@ -73,12 +74,16 @@ function confirmBooking() {
     const childIndex = children.findIndex(c => c.id == childId);
 
     if (childIndex !== -1) {
-        children[childIndex].bookingStatus = `محجوز في: ${center}`;
+        // تخزين الحجز مع نوع التطعيمة المختارة
+        children[childIndex].bookingStatus = `محجوز لـ (${selectedVac}) في: ${center}`;
         localStorage.setItem('children', JSON.stringify(children));
-        alert("تم ربط الحجز بنجاح!");
-        window.location.href = "dashboard.html";
+        
+        alert("تم الحجز بنجاح! سيتم توجيهك الآن لطباعة الكتيب.");
+        // الانتقال التلقائي لصفحة الكتيب كما طلبتِ
+        window.location.href = "dashboard.html"; 
     }
 }
+
 
 // 3. حفظ طفل جديد
 function saveNewChild() {
