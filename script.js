@@ -1,181 +1,89 @@
-// ==========================================
-// 1. قاعدة بيانات النظام (تطعيمات المراكز)
-// ==========================================
-const centerData = {
-    "الفويهات": [
-        { id: 101, vaccine: 'شلل الأطفال', date: '12 مايو 2026', spots: 8 },
-        { id: 102, vaccine: 'الحصبة (MMR)', date: '15 مايو 2026', spots: 4 }
-    ],
-    "الكيش": [
-        { id: 201, vaccine: 'الدرن (BCG)', date: '20 مايو 2026', spots: 12 },
-        { id: 202, vaccine: 'الثلاثي البكتيري', date: '22 مايو 2026', spots: 6 }
-    ],
-    "الماجوري": [
-        { id: 301, vaccine: 'التهاب الكبد', date: '25 مايو 2026', spots: 15 },
-        { id: 302, vaccine: 'شلل الأطفال', date: '28 مايو 2026', spots: 2 }
-    ],
-    "سيدي حسين": [
-        { id: 401, vaccine: 'الحصبة الألمانية', date: '01 يونيو 2026', spots: 10 },
-        { id: 402, vaccine: 'المكورات الرئوية', date: '05 يونيو 2026', spots: 5 }
-    ]
-};
-
-// ==========================================
-// 2. وظائف الحماية والدخول
-// ==========================================
-
-// إظهار وإخفاء كلمة المرور
-function togglePassword(inputId, icon) {
-    const input = document.getElementById(inputId);
-    if (input.type === "password") {
-        input.type = "text";
-        icon.classList.replace("fa-eye-slash", "fa-eye");
-    } else {
-        input.type = "password";
-        icon.classList.replace("fa-eye", "fa-eye-slash");
-    }
-}
-
-// حماية صفحة المشرف بكلمة مرور (التعديل الجديد)
-function checkAdminLogin() {
-    const passInput = document.getElementById('adminPassword');
-    if (passInput.value === "admin123") { // يمكنك تغيير كلمة السر هنا
-        localStorage.setItem('isAdmin', 'true');
-        window.location.href = 'admin.html';
-    } else {
-        alert("خطأ: كلمة مرور المشرف غير صحيحة!");
-    }
-}
-
-// التحقق من الدخول قبل الحجز
-function checkLoginAndRedirect() {
-    const isLoggedIn = localStorage.getItem('isLogged');
-    if (isLoggedIn === 'true') {
-        window.location.href = 'booking.html';
-    } else {
-        alert("يجب عليكِ تسجيل الدخول أولاً للوصول لصفحة الحجز.");
-        window.location.href = 'login.html';
-    }
-}
-
-// ==========================================
-// 3. وظائف الكتيب الإلكتروني والطباعة
-// ==========================================
-
-// ميزة تحميل الكتيب كـ PDF (طلب الأستاذة)
-function downloadBooklet() {
-    window.print(); // سيفتح نافذة الطباعة/الحفظ كـ PDF للمتصفح
-}
-
-// عرض الكتيب (الأرشيف)
-function renderArchive() {
-    const table = document.getElementById('archiveTable');
-    if (table) {
-        let bookings = JSON.parse(localStorage.getItem('sysBookings')) || [];
-        table.innerHTML = bookings.map(b => `
-            <tr>
-                <td>${b.child}</td>
-                <td>${b.vaccine}</td>
-                <td>${b.date}</td>
-                <td><span class="status-badge" style="background:#dcfce7; color:#166534;">تم الحجز</span></td>
-            </tr>
-        `).reverse().join('');
-    }
-}
-
-// ==========================================
-// 4. إدارة المواعيد والحجز
-// ==========================================
-
-// تحديث المواعيد حسب المركز (الميزة الاحترافية)
-function updateAppointmentsByCenter() {
-    const centerSelect = document.getElementById('centerSelect');
-    const tbody = document.getElementById('appointmentsList');
-    if (!centerSelect || !tbody) return;
-
-    const selectedCenter = centerSelect.value;
-    const appointments = centerData[selectedCenter] || [];
+// دالة حفظ طفل جديد من الحقول المباشرة
+function saveNewChild() {
+    const nameInput = document.getElementById('newChildName');
+    const dateInput = document.getElementById('birthDate');
     
-    tbody.innerHTML = '';
-    appointments.forEach(app => {
-        let spotsText = app.spots === 0 ? 'ممتلئ' : app.spots;
-        let disabled = app.spots === 0 ? 'disabled' : '';
+    const name = nameInput.value.trim();
+    const birthDate = dateInput.value;
 
-        tbody.innerHTML += `
-            <tr>
-                <td><input type="radio" name="appointment" value="${app.id}" data-vaccine="${app.vaccine}" data-date="${app.date}" ${disabled} required></td>
-                <td><strong>${app.vaccine}</strong></td>
-                <td>${app.date}</td>
-                <td><span class="status-badge">${spotsText}</span></td>
-            </tr>
-        `;
-    });
+    // 1. التأكد من إدخال البيانات
+    if (!name || !birthDate) {
+        alert("الرجاء إدخال الاسم الثلاثي وتاريخ الميلاد!");
+        return;
+    }
+
+    // 2. منع مواليد 2027 وما بعدها (تحقق إضافي بالكود)
+    const selectedDate = new Date(birthDate);
+    const currentYear = new Date().getFullYear();
+    if (selectedDate.getFullYear() > currentYear) {
+        alert("خطأ: لا يمكن تسجيل تاريخ ميلاد في المستقبل!");
+        return;
+    }
+
+    // 3. تجهيز بيانات الطفل الجديد
+    const newChild = {
+        id: Date.now(), // رقم تعريفي فريد
+        name: name,
+        birthDate: birthDate,
+        vaccinations: [
+            { name: "تطعيم عند الولادة", status: "تم أخذها", date: birthDate },
+            { name: "تطعيم الشهرين", status: "قادم", date: "سيحدد لاحقاً" },
+            { name: "تطعيم 4 أشهر", status: "قادم", date: "سيحدد لاحقاً" }
+            // يمكنك إضافة باقي الجدول هنا
+        ]
+    };
+
+    // 4. الحفظ في LocalStorage
+    let children = JSON.parse(localStorage.getItem('children')) || [];
+    children.push(newChild);
+    localStorage.setItem('children', JSON.stringify(children));
+
+    // 5. مسح الحقول وإخفاء الفورم
+    nameInput.value = '';
+    dateInput.value = '';
+    toggleChildForm(); // إخفاء الفورم بعد الحفظ
+
+    // 6. تحديث العرض فوراً
+    displayChildren();
+    
+    alert("تم حفظ بيانات الطفل بنجاح!");
 }
 
-// حفظ الحجز وتحديث الذاكرة
-const bookingForm = document.getElementById('bookingForm');
-if (bookingForm) {
-    bookingForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const selectedRadio = document.querySelector('input[name="appointment"]:checked');
-        const childSelect = document.getElementById('childSelect');
+// دالة عرض الأطفال في الصفحة
+function displayChildren() {
+    const container = document.getElementById('childrenCardsContainer');
+    if (!container) return;
 
-        const newBooking = {
-            child: childSelect.value,
-            vaccine: selectedRadio.getAttribute('data-vaccine'),
-            date: selectedRadio.getAttribute('data-date'),
-            center: document.getElementById('centerSelect').value
-        };
+    const children = JSON.parse(localStorage.getItem('children')) || [];
+    container.innerHTML = ''; // مسح المحتوى القديم
+
+    if (children.length === 0) {
+        container.innerHTML = '<p style="text-align:center; color:#64748b;">لا يوجد أطفال مسجلين حالياً.</p>';
+        return;
+    }
+
+    children.forEach(child => {
+        const card = document.createElement('div');
+        card.className = 'child-card';
         
-        let bookings = JSON.parse(localStorage.getItem('sysBookings')) || [];
-        bookings.push(newBooking);
-        localStorage.setItem('sysBookings', JSON.stringify(bookings));
-        
-        alert(`🎉 تم الحجز بنجاح للطفل: ${newBooking.child}`);
-        window.location.href = 'dashboard.html'; // الانتقال للكتيب لرؤية الحجز
-    });
-}
+        let tableRows = '';
+        child.vaccinations.forEach(v => {
+            const statusClass = v.status === "تم أخذها" ? "status-done" : "status-upcoming";
+            tableRows += `
+                <tr>
+                    <td>${v.name}</td>
+                    <td>${v.date}</td>
+                    <td><span class="${statusClass}">${v.status}</span></td>
+                </tr>
+            `;
+        });
 
-// ==========================================
-// 5. التشغيل عند التحميل
-// ==========================================
-document.addEventListener('DOMContentLoaded', () => {
-    renderArchive();
-    if (document.getElementById('centerSelect')) {
-        updateAppointmentsByCenter();
-    }
-});
-// وظيفة العين لإظهار الباسورد
-function togglePassword(inputId, icon) {
-    const input = document.getElementById(inputId);
-    if (input.type === "password") {
-        input.type = "text";
-        icon.classList.replace("fa-eye-slash", "fa-eye");
-    } else {
-        input.type = "password";
-        icon.classList.replace("fa-eye", "fa-eye-slash");
-    }
-}
-
-// كلمة مرور المشرف
-function checkAdminLogin() {
-    const pass = document.getElementById('adminPassword').value;
-    if (pass === "admin123") {
-        localStorage.setItem('isAdmin', 'true');
-        window.location.href = 'admin.html';
-    } else {
-        alert("كلمة المرور خاطئة!");
-    }
-}
-document.getElementById('centerSelect').addEventListener('change', function() {
-    const selectedCenter = this.value;
-    const bookingDetailsArea = document.querySelector('.booking-step'); // المنطقة التي ستظهر فيها المواعيد
-
-    if (selectedCenter) {
-        // هنا نقوم بتحديث واجهة المستخدم بناءً على المركز المختار
-        // يمكنك إضافة جدول أو قائمة بالمواعيد المتوفرة لهذا المركز
-        bookingDetailsArea.innerHTML = `
-            <p style="font-weight:bold; margin-bottom:10px;">المواعيد المتاحة في ${selectedCenter}:</p>
+        card.innerHTML = `
+            <div class="child-info">
+                <h3><i class="fa-solid fa-child"></i> ${child.name}</h3>
+                <p>تاريخ الميلاد: ${child.birthDate}</p>
+                <button onclick="deleteChild(${child.id})" class="btn-small btn-danger no-print">حذف</button>
+            </div>
             <div class="table-responsive">
                 <table>
                     <thead>
@@ -186,28 +94,27 @@ document.getElementById('centerSelect').addEventListener('change', function() {
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>شلل الأطفال</td>
-                            <td>2026-05-10</td>
-                            <td><span class="status-upcoming">متوفر</span></td>
-                        </tr>
+                        ${tableRows}
                     </tbody>
                 </table>
             </div>
+            <button onclick="window.print()" class="btn btn-small no-print" style="margin-top:10px; background:#64748b;">
+                <i class="fa-solid fa-print"></i> طباعة الكتيب
+            </button>
         `;
-    }
-});
-function addChild() {
-    const birthDate = new Date(document.getElementById('birthDate').value);
-    const currentYear = new Date().getFullYear(); // سيجلب 2026
-
-    if (birthDate.getFullYear() > currentYear) {
-        alert("خطأ: لا يمكن تسجيل طفل بتاريخ ميلاد مستقبلي (2027 وما فوق)!");
-        return; // توقيف العملية
-    }
-    
-    // تكملة كود الإضافة الطبيعي...
+        container.appendChild(card);
+    });
 }
 
+// دالة الحذف
+function deleteChild(id) {
+    if (confirm("هل أنتِ متأكدة من حذف بيانات هذا الطفل؟")) {
+        let children = JSON.parse(localStorage.getItem('children')) || [];
+        children = children.filter(c => c.id !== id);
+        localStorage.setItem('children', JSON.stringify(children));
+        displayChildren();
+    }
+}
 
-
+// استدعاء العرض عند تحميل الصفحة
+document.addEventListener('DOMContentLoaded', displayChildren);
