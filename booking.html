@@ -148,9 +148,38 @@
             
             alert(`🎉 تم تأكيد الحجز بنجاح!\nالطفل: ${selectedChild}\nالمركز: ${document.getElementById('centerSelect').value}\nالتطعيم: ${vaccineName}\nالموعد: ${vaccineDate}`);
         });
+// تنفيذ الحجز والربط بالكتيب
+document.getElementById('bookingForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const selectedChild = document.getElementById('childSelect').value;
+    const selectedRadio = document.querySelector('input[name="appointment"]:checked');
+    const selectedCenter = document.getElementById('centerSelect').value;
 
+    if (!selectedChild) {
+        alert("الرجاء اختيار الطفل أولاً!");
+        return;
+    }
+
+    const newBooking = {
+        child: selectedChild,
+        vaccine: selectedRadio.getAttribute('data-vaccine'),
+        date: selectedRadio.getAttribute('data-date'),
+        center: selectedCenter,
+        taken: false // الحالة الافتراضية
+    };
+
+    // حفظ في الذاكرة المشتركة
+    let bookings = JSON.parse(localStorage.getItem('sysBookings')) || [];
+    bookings.push(newBooking);
+    localStorage.setItem('sysBookings', JSON.stringify(bookings));
+
+    alert(`✅ تم الحجز بنجاح!\nسيتم نقلك الآن لكتيب الطفل.`);
+    window.location.href = 'dashboard.html'; // الانتقال التلقائي
+});
         // تشغيل العرض الأولي عند فتح الصفحة
         updateAppointmentsByCenter();
+        
     </script>
 </body>
 </html>
+
