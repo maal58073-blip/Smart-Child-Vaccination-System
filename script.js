@@ -1,13 +1,64 @@
+// --- المرحلة الأولى: قاعدة بيانات المراكز والقيود ---
+
+// 1. قاعدة بيانات المراكز (تحديث النقطة الأولى)
+const centersData = {
+    "مركز بنغازي الطبي": [
+        { name: "شلل الأطفال", count: 50, available: true },
+        { name: "الخماسي", count: 12, available: true },
+        { name: "الكبد البائي", count: 0, available: false }
+    ],
+    "مركز سيدي يونس الصحي": [
+        { name: "الثلاثي", count: 30, available: true },
+        { name: "شلل الأطفال", count: 15, available: true },
+        { name: "الدرن", count: 2, available: true }
+    ],
+    "مستشفى الأطفال": [
+        { name: "الحصبة", count: 100, available: true },
+        { name: "الروتا", count: 40, available: true }
+    ]
+};
+
+// 2. تحديث قائمة التطعيمات عند اختيار المركز
+document.addEventListener('change', function(e) {
+    if (e.target && e.target.id === 'centerSelect') {
+        const center = e.target.value;
+        const infoArea = document.querySelector('.booking-step'); 
+        const vaccines = centersData[center] || [];
+        
+        let content = `<p style="margin-bottom:10px;"><b>التطعيمات المتوفرة في ${center}:</b></p>`;
+        content += `<div style="display: grid; grid-template-columns: 1fr; gap: 8px;">`;
+        
+        if (vaccines.length > 0) {
+            vaccines.forEach(v => {
+                const badgeClass = v.count > 0 ? 'status-done' : 'status-upcoming';
+                const statusText = v.count > 0 ? `متوفر (${v.count})` : "غير متوفر حالياً";
+                content += `
+                    <div style="background: white; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; justify-content: space-between;">
+                        <span>📍 ${v.name}</span>
+                        <span class="${badgeClass}" style="font-size: 0.75rem;">${statusText}</span>
+                    </div>`;
+            });
+        } else {
+            content += `<p style="color:red;">الرجاء اختيار مركز صحيح من القائمة.</p>`;
+        }
+        
+        content += `</div>`;
+        infoArea.innerHTML = content;
+    }
+});
+
 // --- 1. التأكد من تحميل الصفحة ---
 document.addEventListener('DOMContentLoaded', function() {
     console.log("النظام جاهز...");
-    displayChildren(); // عرض الأطفال المخزنين عند البدء
+    displayChildren(); 
+    populateChildSelect();
 });
 
 // --- 2. دالة إظهار وإخفاء الفورم ---
 function toggleChildForm() {
     const form = document.getElementById('addChildForm');
     const btn = document.getElementById('showFormBtn');
+    if (!form) return;
     if (form.style.display === 'none' || form.style.display === '') {
         form.style.display = 'block';
         btn.innerHTML = '<i class="fa-solid fa-times-circle"></i> إلغاء';
@@ -19,38 +70,43 @@ function toggleChildForm() {
     }
 }
 
-// --- 3. دالة الحفظ الرئيسية ---
+// --- 3. دالة الحفظ مع قيود التاريخ الصارمة (النقطة الثانية) ---
 function saveNewChild() {
     const nameInput = document.getElementById('newChildName');
     const dateInput = document.getElementById('birthDate');
     
-    if (!nameInput || !dateInput) {
-        alert("خطأ: لم يتم العثور على حقول الإدخال في الصفحة!");
-        return;
-    }
+    if (!nameInput || !dateInput) return;
 
     const name = nameInput.value.trim();
-    const birthDate = dateInput.value;
+    const birthDateValue = dateInput.value;
 
-    if (!name || !birthDate) {
+    if (!name || !birthDateValue) {
         alert("الرجاء إدخال الاسم الثلاثي وتاريخ الميلاد!");
         return;
     }
 
-    // منع تاريخ 2027
-    const year = new Date(birthDate).getFullYear();
-    if (year > 2026) {
-        alert("خطأ: لا يمكن تسجيل مواليد سنة " + year);
+    const birthDate = new Date(birthDateValue);
+    const today = new Date();
+    
+    // قيد منع التواريخ المستقبلية (مواليد 2027 وما بعدها)
+    if (birthDate > today) {
+        alert("خطأ طبي: لا يمكن تسجيل طفل لم يولد بعد (تاريخ مستقبلي)!");
         return;
     }
 
-    // إنشاء الكائن للطفل مع جدول التطعيمات
+    // قيد العمر المنطقي (مثلاً لا نقبل أطفال أكبر من 15 سنة في منظومة تطعيم صغار)
+    const ageInYears = today.getFullYear() - birthDate.getFullYear();
+    if (ageInYears > 15) {
+        alert("تنبيه: هذا الطفل تجاوز سن التطعيمات الأساسية (أكبر من 15 سنة)!");
+        return;
+    }
+
     const newChild = {
         id: Date.now(),
         name: name,
-        birthDate: birthDate,
+        birthDate: birthDateValue,
         vaccinations: [
-            { name: "عند الولادة (درن/كبد ب)", status: "تم أخذها", date: birthDate },
+            { name: "عند الولادة (درن/كبد ب)", status: "تم أخذها", date: birthDateValue },
             { name: "تطعيم شهرين", status: "قادم", date: "معلق" },
             { name: "تطعيم 4 أشهر", status: "قادم", date: "معلق" },
             { name: "تطعيم 6 أشهر", status: "قادم", date: "معلق" },
@@ -60,19 +116,15 @@ function saveNewChild() {
         ]
     };
 
-    // حفظ في الذاكرة المحلية
     let children = JSON.parse(localStorage.getItem('children')) || [];
     children.push(newChild);
     localStorage.setItem('children', JSON.stringify(children));
 
-    // تنظيف الواجهة
     nameInput.value = '';
     dateInput.value = '';
     toggleChildForm();
-    
-    // إعادة العرض
     displayChildren();
-    alert("تمت إضافة " + name + " بنجاح!");
+    alert("تم تسجيل الطفل " + name + " بنجاح في المنظومة.");
 }
 
 // --- 4. دالة عرض الكروت والجداول ---
@@ -84,7 +136,7 @@ function displayChildren() {
     container.innerHTML = '';
 
     if (children.length === 0) {
-        container.innerHTML = '<div class="card"><p>لا يوجد أطفال مسجلين. ابدئي بإضافة طفلك الأول!</p></div>';
+        container.innerHTML = '<div class="card"><p>لا يوجد أطفال مسجلين حالياً.</p></div>';
         return;
     }
 
@@ -111,7 +163,7 @@ function displayChildren() {
                 </table>
             </div>
             <button onclick="window.print()" class="btn btn-small no-print" style="background:#64748b; margin-top:15px;">
-                <i class="fa-solid fa-print"></i> طباعة الكتيب
+                <i class="fa-solid fa-print"></i> طباعة الكتيب الإلكتروني
             </button>
         `;
         container.appendChild(card);
@@ -120,23 +172,20 @@ function displayChildren() {
 
 // --- 5. دالة الحذف ---
 function deleteChild(id) {
-    if (confirm("هل أنتِ متأكدة من حذف هذا الطفل نهائياً؟")) {
+    if (confirm("هل أنتِ متأكدة من حذف سجل هذا الطفل؟ لا يمكن التراجع عن هذه الخطوة.")) {
         let children = JSON.parse(localStorage.getItem('children')) || [];
         children = children.filter(c => c.id !== id);
         localStorage.setItem('children', JSON.stringify(children));
         displayChildren();
     }
 }
-// --- كود خاص بصفحة الحجز booking.html ---
 
-// 1. دالة لتعبئة قائمة الأطفال المسجلين في قائمة الاختيار
+// --- دالة تعبئة قائمة الأطفال في صفحة الحجز ---
 function populateChildSelect() {
     const childSelect = document.getElementById('childSelect');
-    if (!childSelect) return; // لضمان عدم حدوث خطأ في الصفحات الأخرى
+    if (!childSelect) return;
 
     const children = JSON.parse(localStorage.getItem('children')) || [];
-    
-    // مسح الخيارات القديمة (باستثناء الخيار الأول)
     childSelect.innerHTML = '<option value="" disabled selected>-- اختر الطفل --</option>';
 
     children.forEach(child => {
@@ -147,25 +196,10 @@ function populateChildSelect() {
     });
 }
 
-// 2. دالة التعامل مع إرسال نموذج الحجز
+// نموذج الحجز
 if (document.getElementById('bookingForm')) {
     document.getElementById('bookingForm').addEventListener('submit', function(e) {
         e.preventDefault();
-        
-        const childId = document.getElementById('childSelect').value;
-        const center = document.getElementById('centerSelect').value;
-
-        if (!childId || !center) {
-            alert("الرجاء اختيار الطفل والمركز الصحي!");
-            return;
-        }
-
-        alert("تم حجز الموعد بنجاح! سيتم إرسال تفاصيل الموعد لهاتفك.");
-        // يمكنك هنا إضافة منطق لتحديث حالة التطعيم في الـ LocalStorage إذا أردتِ
+        alert("تم استلام طلب الحجز! سيتم التحقق من توفر الطعوم في المركز المختار.");
     });
 }
-
-// تشغيل دالة تعبئة الأسماء عند تحميل الصفحة
-window.addEventListener('DOMContentLoaded', populateChildSelect);
-
-
