@@ -145,3 +145,26 @@ document.addEventListener('DOMContentLoaded', () => {
         updateAppointmentsByCenter();
     }
 });
+// وظيفة العين لإظهار الباسورد
+function togglePassword(inputId, icon) {
+    const input = document.getElementById(inputId);
+    if (input.type === "password") {
+        input.type = "text";
+        icon.classList.replace("fa-eye-slash", "fa-eye");
+    } else {
+        input.type = "password";
+        icon.classList.replace("fa-eye", "fa-eye-slash");
+    }
+}
+
+// كلمة مرور المشرف
+function checkAdminLogin() {
+    const pass = document.getElementById('adminPassword').value;
+    if (pass === "admin123") {
+        localStorage.setItem('isAdmin', 'true');
+        window.location.href = 'admin.html';
+    } else {
+        alert("كلمة المرور خاطئة!");
+    }
+}
+
