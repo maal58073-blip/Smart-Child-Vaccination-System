@@ -1,10 +1,47 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>تواصل معنا - منظومة التطعيمات</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* تعديلات خاصة بصفحة التواصل لإعادة التنسيق الدقيق */
+        .container {
+            max-width: 1000px !important; /* عرض متناسق */
+            margin: 0 auto !important;
+            flex: 1; /* دفع الفوتر لأسفل الصفحة */
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .card {
+            max-width: 600px !important; /* حجم الكرت كما في السابق */
+            margin: 20px auto !important;
+            padding: 30px !important;
+        }
+
+        .contact-info-item {
+            margin-bottom: 20px;
+            padding: 10px;
+            border-right: 3px solid var(--primary);
+            background: #f1f5f9;
+            border-radius: 0 10px 10px 0;
+        }
+
+        /* تنسيق الموبايل */
+        @media screen and (max-width: 768px) {
+            .container {
+                padding: 15px !important;
+            }
+            .card {
+                max-width: 95% !important;
+                padding: 20px !important;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="top-header">
@@ -15,27 +52,28 @@
     <nav>
         <a href="index.html"><i class="fa-solid fa-house"></i> الرئيسية</a>
         <a href="booking.html"><i class="fa-solid fa-calendar-check"></i> حجز موعد</a>
+        <a href="dashboard.html"><i class="fa-solid fa-book-medical"></i> الكتيب الإلكتروني</a>
         <a href="contact.html" class="active"><i class="fa-solid fa-envelope"></i> تواصل معنا</a>
     </nav>
 
     <div class="container">
         <div class="card">
-            <h2>تواصل معنا <i class="fa-solid fa-headset"></i></h2>
+            <h2 style="margin-bottom: 10px;">تواصل معنا <i class="fa-solid fa-headset"></i></h2>
             <p style="color: #64748b; margin-bottom: 25px;">هل لديكِ أي استفسار؟ نحن هنا لمساعدتكِ في أي وقت.</p>
 
             <div style="text-align: right; margin-bottom: 30px;">
-                <div style="margin-bottom: 20px;">
-                    <h3 style="color: var(--primary);"><i class="fa-solid fa-location-dot"></i> الموقع</h3>
+                <div class="contact-info-item">
+                    <h3 style="color: var(--primary); font-size: 1.1rem;"><i class="fa-solid fa-location-dot"></i> الموقع</h3>
                     <p>بنغازي، ليبيا - المركز الصحي الرئيسي</p>
                 </div>
 
-                <div style="margin-bottom: 20px;">
-                    <h3 style="color: var(--primary);"><i class="fa-solid fa-phone"></i> رقم الهاتف</h3>
-                    <p dir="ltr">+218 91 000 0000</p>
+                <div class="contact-info-item">
+                    <h3 style="color: var(--primary); font-size: 1.1rem;"><i class="fa-solid fa-phone"></i> رقم الهاتف</h3>
+                    <p dir="ltr" style="text-align: right;">+218 91 000 0000</p>
                 </div>
 
-                <div style="margin-bottom: 20px;">
-                    <h3 style="color: var(--primary);"><i class="fa-solid fa-clock"></i> ساعات العمل</h3>
+                <div class="contact-info-item">
+                    <h3 style="color: var(--primary); font-size: 1.1rem;"><i class="fa-solid fa-clock"></i> ساعات العمل</h3>
                     <p>السبت - الخميس: 8:00 ص - 2:00 م</p>
                 </div>
             </div>
@@ -48,19 +86,18 @@
                     <input type="email" placeholder="البريد الإلكتروني" required>
                 </div>
                 <div class="form-group">
-                    <textarea placeholder="رسالتكِ هنا..." style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 10px; height: 100px; font-family: 'Cairo';"></textarea>
+                    <textarea placeholder="رسالتكِ هنا..." style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 10px; height: 100px; font-family: 'Cairo'; font-size: 1rem;"></textarea>
                 </div>
                 <button type="submit" class="btn">إرسال الرسالة <i class="fa-solid fa-paper-plane"></i></button>
             </form>
         </div>
     </div>
 
-     <footer>
+    <footer>
         <p>جميع الحقوق محفوظة &copy; 2026 - منظومة صغارنا للتطعيمات</p>
         <p>بنغازي - ليبيا | حماية أطفالنا مسؤوليتنا <i class="fa-solid fa-heart" style="color:#ef4444;"></i></p>
     </footer>
 
     <script src="script.js"></script>
 </body>
-
 </html>
