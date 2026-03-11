@@ -3,12 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منظومة التطعيمات - الرئيسية</title>
+    <title>منظومة صغارنا - الرئيسية</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
     <style>
-        .hero-img { width: 100%; max-height: 380px; object-fit: cover; border-radius: 15px; margin-top: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        .card { max-width: 550px !important; margin: 20px auto; }
+        .hero-img { 
+            width: 100%; 
+            max-height: 380px; 
+            object-fit: cover; 
+            border-radius: 20px; 
+            margin-top: 20px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+            border: 3px solid #fff;
+        }
+        .card { max-width: 600px !important; margin: 30px auto; text-align: center; }
+        .welcome-title { color: var(--primary); font-size: 1.8rem; margin-bottom: 15px; }
     </style>
 </head>
 <body>
@@ -18,33 +27,36 @@
     </div>
 
     <nav>
-        <a href="index.html" class="active">الرئيسية</a>
-        <a href="booking.html">حجز موعد</a>
-        <a href="dashboard.html">الكتيب الإلكتروني</a>
-        <a href="contact.html">تواصل معنا</a>
+        <a href="index.html" class="active"><i class="fa-solid fa-house"></i> الرئيسية</a>
+        <a href="booking.html"><i class="fa-solid fa-calendar-check"></i> حجز موعد</a>
+        <a href="dashboard.html"><i class="fa-solid fa-book-medical"></i> الكتيب الإلكتروني</a>
+        <a href="contact.html"><i class="fa-solid fa-envelope"></i> تواصل معنا</a>
     </nav>
 
     <div class="container">
         <div class="card">
-            <h2>مرحباً بكِ في منظومة التطعيمات <i class="fa-solid fa-syringe" style="color: #4f46e5;"></i></h2>
-            <p style="margin: 15px 0; color: var(--text-main);">احجزي موعد طفلكِ الآن بكل سهولة وأمان عبر منصتنا الإلكترونية.</p>
-            <button onclick="window.location.href='booking.html'" class="btn" style="margin-bottom: 20px;">
-                <i class="fa-solid fa-calendar-plus"></i> احجز موعدك الآن
+            <h2 class="welcome-title">مرحباً بكِ في منظومة صغارنا <i class="fa-solid fa-syringe"></i></h2>
+            <p style="margin: 20px 0; color: #475569; line-height: 1.6;">منصتكم المتكاملة في بنغازي لمتابعة تطعيمات أطفالكم، حجز المواعيد، واستخراج الكتيب الإلكتروني بضغطة زر.</p>
+            
+            <button onclick="window.location.href='booking.html'" class="btn" style="margin-bottom: 25px; padding: 15px 40px; font-size: 1.1rem;">
+                <i class="fa-solid fa-calendar-plus"></i> ابدئي بحجز موعد الآن
             </button>
-            <img src="images/hero.jpg.jpeg" alt="طبيبة وطفل" class="hero-img">
+            
+            <img src="images/hero.jpg.jpeg" alt="رعاية طبية للأطفال" class="hero-img">
         </div>
     </div>
 
    <footer class="no-print">
-    <p>جميع الحقوق محفوظة &copy; 2026 - منظومة صغارنا للتطعيمات</p>
-    <p>بنغازي - ليبيا | حماية أطفالنا مسؤوليتنا ❤️</p>
-    
-    <div style="margin-top: 15px; border-top: 1px solid #334155; padding-top: 10px;">
-        <a href="admin.html" style="color: #94a3b8; text-decoration: none; font-size: 0.8rem; opacity: 0.6;">
-            <i class="fa-solid fa-lock"></i> دخول الإدارة
-        </a>
-    </div>
-</footer>
+        <p>جميع الحقوق محفوظة &copy; 2026 - منظومة صغارنا للتطعيمات</p>
+        <p>بنغازي - ليبيا | حماية أطفالنا مسؤوليتنا <i class="fa-solid fa-heart" style="color:#ef4444;"></i></p>
+        
+        <div style="margin-top: 20px; border-top: 1px solid #e2e8f0; padding-top: 15px;">
+            <a href="admin.html" style="color: #94a3b8; text-decoration: none; font-size: 0.85rem; transition: 0.3s;">
+                <i class="fa-solid fa-lock"></i> بوابة دخول الإدارة
+            </a>
+        </div>
+    </footer>
+
     <script src="script.js"></script>
 </body>
 </html>
