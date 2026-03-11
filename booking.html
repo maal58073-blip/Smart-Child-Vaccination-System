@@ -7,16 +7,15 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
     <style>
-        /* تعديلات خاصة بصفحة الحجز لضبط الحجم */
         .container {
-            flex: 1; /* دفع الفوتر للأسفل */
+            flex: 1;
             display: flex;
             justify-content: center;
             align-items: flex-start;
         }
 
         .card {
-            max-width: 550px !important; /* هذا هو السر لتعود مثل باقي الصفحات */
+            max-width: 550px !important;
             margin: 20px auto !important;
             padding: 30px !important;
         }
@@ -27,40 +26,23 @@
             border-radius: 12px;
             margin-bottom: 15px;
             border: 1px solid #e2e8f0;
-        }
-
-        /* تنسيق الأزرار داخل الحجز */
-        .btn-group {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 15px;
+            min-height: 100px; /* ضمان مساحة كافية للجدول */
         }
 
         @media screen and (max-width: 768px) {
-            .card {
-                max-width: 95% !important;
-            }
+            .card { max-width: 95% !important; }
         }
-        select {
-    width: 100% !important; /* ضمان أخذ العرض الكامل للكرت */
-    padding: 12px 15px !important; /* مساحة كافية للضغط بالإصبع */
-    font-size: 16px !important; /* لمنع الزووم التلقائي في الآيفون عند الضغط */
-    border: 2px solid #e2e8f0;
-    border-radius: 10px;
-    background-color: #fff;
-    cursor: pointer;
-    appearance: auto; /* إظهار سهم الاختيار بشكل طبيعي */
-}
-        /* حل مشكلة الحقول الضيقة على الموبايل */
-select, input[type="date"], input[type="text"] {
-    width: 100% !important; 
-    height: 50px !important; /* لسهولة الضغط بالإصبع */
-    font-size: 16px !important; 
-    padding: 10px !important;
-    display: block;
-    margin-bottom: 10px;
-}
+
+        select, input[type="date"], input[type="text"] {
+            width: 100% !important; 
+            height: 50px !important;
+            font-size: 16px !important; 
+            padding: 10px !important;
+            display: block;
+            margin-bottom: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+        }
     </style>
 </head>
 <body>
@@ -81,34 +63,31 @@ select, input[type="date"], input[type="text"] {
             <h2 style="margin-bottom: 10px;">حجز موعد تطعيم <i class="fa-solid fa-calendar-plus"></i></h2>
             <p style="color: #64748b; margin-bottom: 25px;">يرجى ملء البيانات التالية بدقة لتأكيد الموعد.</p>
 
-            <form id="bookingForm">
+            <form id="bookingForm" onsubmit="event.preventDefault();">
                 <div class="form-group">
                     <label style="display:block; text-align:right; margin-bottom:8px; font-weight:bold;">اختيار الطفل:</label>
                     <select id="childSelect" required>
                         <option value="" disabled selected>-- اختر الطفل --</option>
-                        </select>
+                    </select>
                 </div>
 
                 <div class="form-group">
                     <label style="display:block; text-align:right; margin-bottom:8px; font-weight:bold;">المركز الصحي:</label>
                     <select id="centerSelect" required>
                         <option value="" disabled selected>-- اختر المركز القريب منك --</option>
-                        <option>مركز بنغازي الطبي</option>
-                        <option>مركز سيدي يونس الصحي</option>
-                        <option>مستشفى الأطفال</option>
+                        <option value="مركز بنغازي الطبي">مركز بنغازي الطبي</option>
+                        <option value="مركز سيدي يونس الصحي">مركز سيدي يونس الصحي</option>
+                        <option value="مستشفى الأطفال">مستشفى الأطفال</option>
                     </select>
                 </div>
 
                 <div class="booking-step">
-                    <p style="font-weight:bold; margin-bottom:10px;">المواعيد المتاحة:</p>
-                    <div class="btn-group">
-                        <button type="button" class="btn btn-small" style="background:#6366f1;">التطعيم القادم</button>
-                        <button type="button" class="btn btn-small" style="background:#6366f1;">التاريخ المتاح</button>
-                    </div>
+                    <p id="placeholderText" style="text-align: center; color: #94a3b8; padding-top: 20px;">
+                        يرجى اختيار المركز لعرض التطعيمات والمواعيد المتاحة هنا..
+                    </p>
                 </div>
 
-                <button type="submit" class="btn">تأكيد الحجز ونقله للكتيب <i class="fa-solid fa-check-double"></i></button>
-            </form>
+                </form>
         </div>
     </div>
 
@@ -120,5 +99,3 @@ select, input[type="date"], input[type="text"] {
     <script src="script.js"></script>
 </body>
 </html>
-
-
