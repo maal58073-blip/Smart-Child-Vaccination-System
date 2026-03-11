@@ -1,3 +1,4 @@
+// 1. قاعدة بيانات المراكز والتطعيمات
 const centersData = {
     "مركز بنغازي الطبي": [
         { name: "شلل الأطفال", count: 50, date: "2026-03-20" },
@@ -13,7 +14,7 @@ const centersData = {
     ]
 };
 
-// 1. تحديث جدول المواعيد في صفحة الحجز
+// 2. تحديث جدول المواعيد عند اختيار المركز
 document.addEventListener('change', function(e) {
     if (e.target && e.target.id === 'centerSelect') {
         const center = e.target.value;
@@ -21,66 +22,74 @@ document.addEventListener('change', function(e) {
         if (!infoArea) return;
 
         const vaccines = centersData[center] || [];
-        let tableHTML = `<p><b>المواعيد المتاحة في ${center}:</b></p>
+        let tableHTML = `<p style="margin-top:15px;"><b>المواعيد المتاحة في ${center}:</b></p>
             <div class="table-wrapper">
-        <table>
-            <thead>
-                <tr>
-                    <th>اختيار</th>
-                    <th>التطعيم</th>
-                    <th>الكمية</th>
-                    <th>التاريخ</th>
-                </tr>
-            </thead>
-            <tbody>`;
-
-vaccines.forEach((v, index) => {
-    tableHTML += `<tr>
-        <td><input type="radio" name="selectedVaccine" value="${v.name}" id="vac_${index}"></td>
-        <td><label for="vac_${index}">${v.name}</label></td>
-        <td>${v.count}</td>
-        <td style="color:blue; font-weight:bold;">${v.date}</td>
-    </tr>`;
-});
-
+                <table>
+                    <thead>
+                        <tr>
+                            <th>اختيار</th>
+                            <th>التطعيم</th>
+                            <th>الكمية</th>
+                            <th>التاريخ</th>
+                        </tr>
                     </thead>
                     <tbody>`;
         
-        vaccines.forEach(v => {
+        vaccines.forEach((v, index) => {
             tableHTML += `<tr>
-                <td>${v.name}</td>
+                <td><input type="radio" name="selectedVaccine" value="${v.name}" id="vac_${index}"></td>
+                <td><label for="vac_${index}">${v.name}</label></td>
                 <td>${v.count}</td>
                 <td style="color:blue; font-weight:bold;">${v.date}</td>
             </tr>`;
         });
+        
         tableHTML += `</tbody></table></div>
         <button onclick="confirmBooking()" class="btn" style="margin-top:15px; width:100%;">تأكيد الحجز لهذا المركز ✅</button>`;
         infoArea.innerHTML = tableHTML;
     }
 });
 
-// 2. تأكيد الحجز وربط الطفل
+// 3. تأكيد الحجز والربط التلقائي
+function confirmBooking() {
+    const childId = document.getElementById('childSelect')?.value;
+    const center = document.getElementById('centerSelect')?.value;
+    const selectedVac = document.querySelector('input[name="selectedVaccine"]:checked')?.value;
+
+    if (!childId || !center || !selectedVac) {
+        alert("الرجاء اختيار الطفل، المركز، ونوع التطعيمة أولاً!");
+        return;
+    }
+
+    let children = JSON.parse(localStorage.getItem('children')) || [];
+    const childIndex = children.findIndex(c => c.id == childId);
+
+    if (childIndex !== -1) {
+        children[childIndex].bookingStatus = `محجوز لـ (${selectedVac}) في: ${center}`;
+        localStorage.setItem('children', JSON.stringify(children));
+        alert("تم ربط الحجز بنجاح! جاري توجيهك لصفحة الكتيب...");
+        window.location.href = "dashboard.html";
+    }
+}
+
+// 4. حفظ طفل جديد مع قيد التاريخ (منع 2027)
 function saveNewChild() {
     const nameInput = document.getElementById('newChildName');
     const dateInput = document.getElementById('birthDate');
     const name = nameInput.value.trim();
     const birthDateValue = dateInput.value;
-
-    // الحصول على تاريخ اليوم بدقة
     const today = new Date().toISOString().split('T')[0];
 
     if (!name || !birthDateValue) {
-        alert("يرجى إدخال اسم الطفل وتاريخ ميلاده!");
+        alert("يرجى إدخال البيانات كاملة!");
         return;
     }
 
-    // القيد الذي طلبتِه: منع التواريخ المستقبلية (مثل 2027)
     if (birthDateValue > today) {
-        alert("خطأ: لا يمكن تسجيل طفل بتاريخ مستقبلي! يرجى اختيار تاريخ ميلاد صحيح.");
+        alert("خطأ: لا يمكن إدخال تاريخ في المستقبل! (سنة 2027 غير مقبولة حالياً)");
         return;
     }
 
-    // بقية كود الحفظ...
     const newChild = {
         id: Date.now(),
         name: name,
@@ -98,56 +107,14 @@ function saveNewChild() {
     children.push(newChild);
     localStorage.setItem('children', JSON.stringify(children));
     
-    // إعادة تفريغ الحقول
     nameInput.value = '';
     dateInput.value = '';
-    
-    displayChildren(); // تحديث العرض فوراً
-    alert("تم إضافة الطفل بنجاح! يمكنكِ الآن حجز موعد له.");
-}
-
-
-// 3. حفظ طفل جديد
-function saveNewChild() {
-    const nameInput = document.getElementById('newChildName');
-    const dateInput = document.getElementById('birthDate');
-    const name = nameInput.value.trim();
-    const today = new Date().toISOString().split('T')[0]; // تاريخ اليوم
-
-if (!name || !birthDateValue) {
-    alert("يرجى إدخال البيانات كاملة!");
-    return;
-}
-
-if (birthDateValue > today) {
-    alert("خطأ: لا يمكن إدخال تاريخ في المستقبل! يرجى إدخال تاريخ ميلاد صحيح.");
-    return;
-}
-
-
-    const newChild = {
-        id: Date.now(),
-        name: name,
-        birthDate: birthDateValue,
-        bookingStatus: "لا يوجد حجز نشط",
-        vaccinations: [
-            { name: "عند الولادة", status: "تم أخذها", date: birthDateValue },
-            { name: "شهرين", status: "قادم", date: "معلق" },
-            { name: "4 أشهر", status: "قادم", date: "معلق" },
-            { name: "6 أشهر", status: "قادم", date: "معلق" }
-        ]
-    };
-
-    let children = JSON.parse(localStorage.getItem('children')) || [];
-    children.push(newChild);
-    localStorage.setItem('children', JSON.stringify(children));
-    nameInput.value = '';
-    dateInput.value = '';
-    toggleChildForm();
+    if(document.getElementById('addChildForm')) toggleChildForm();
     displayChildren();
+    alert("تم حفظ بيانات الطفل بنجاح! 🌸");
 }
 
-// 4. عرض الأطفال في الكتيب
+// 5. عرض الكتيبات
 function displayChildren() {
     const container = document.getElementById('childrenCardsContainer');
     if (!container) return;
@@ -160,11 +127,7 @@ function displayChildren() {
         let rows = '';
         child.vaccinations.forEach(v => {
             const cls = v.status === "تم أخذها" ? "status-done" : "status-upcoming";
-            rows += `<tr>
-                <td>${v.name}</td>
-                <td>${v.date}</td>
-                <td><span class="${cls}">${v.status}</span></td>
-            </tr>`;
+            rows += `<tr><td>${v.name}</td><td>${v.date}</td><td><span class="${cls}">${v.status}</span></td></tr>`;
         });
 
         card.innerHTML = `
@@ -180,84 +143,39 @@ function displayChildren() {
                 </table>
             </div>
             <div class="no-print" style="display:flex; gap:10px; margin-top:15px;">
-                <button onclick="printSpecificChild()" class="btn-small btn-success" style="flex:2;">طباعة الكتيب 🖨️</button>
+                <button onclick="printSpecificChild()" class="btn-small btn-success" style="flex:2;">حفظ/طباعة الكتيب (PDF) 🖨️</button>
                 <button onclick="deleteChild(${child.id})" class="btn-small btn-danger" style="flex:1;">حذف</button>
-            </div>
-        `;
+            </div>`;
         container.appendChild(card);
     });
 }
 
-// 5. دالة الطباعة الاحترافية (محدثة لتعمل مع الهيدر الرسمي)
+// 6. الطباعة الاحترافية
 function printSpecificChild() {
     const now = new Date();
     const dateStr = now.toLocaleDateString('ar-LY', { year: 'numeric', month: 'long', day: 'numeric' });
     const dayStr = now.toLocaleDateString('ar-LY', { weekday: 'long' });
     
-    // تحديث التاريخ واليوم في الهيدر المخفي
     const dateElem = document.getElementById('print-date-today');
     const dayElem = document.getElementById('print-day-today');
     const headerElem = document.getElementById('official-print-header');
     
     if(dateElem) dateElem.innerText = "بتاريخ: " + dateStr;
     if(dayElem) dayElem.innerText = "يوم: " + dayStr;
-    if(headerElem) headerElem.style.display = "block"; // إظهاره مؤقتاً للطباعة
+    if(headerElem) headerElem.style.display = "block";
 
     window.print();
-    
-    if(headerElem) headerElem.style.display = "none"; // إخفاؤه مجدداً بعد الطباعة
+    if(headerElem) headerElem.style.display = "none";
 }
 
-// 6. لوحة التحكم (Admin)
+// 7. حماية الإدارة (كلمة المرور)
 function adminLogin() {
-    const pass = prompt("كلمة مرور المشرف:");
-    if (pass === "2026") showAdminPanel();
-    else alert("كلمة مرور خاطئة!");
+    const pass = prompt("أدخلي كلمة مرور المشرف:");
+    if (pass === "admin2026") showAdminPanel();
+    else alert("عذراً، كلمة المرور خاطئة!");
 }
 
-function showAdminPanel() {
-    const adminHTML = `
-        <div id="adminModal" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; display:flex; justify-content:center; align-items:center;">
-            <div style="background:white; padding:20px; border-radius:10px; width:90%; max-width:400px; text-align:right;">
-                <h3>إدارة الكميات</h3>
-                <select id="adminCenterSelect" onchange="loadAdminVaccines()" style="width:100%; padding:10px; margin-bottom:10px;">
-                    <option value="">اختر المركز لتعديله</option>
-                    <option value="مركز بنغازي الطبي">مركز بنغازي الطبي</option>
-                    <option value="مركز سيدي يونس الصحي">مركز سيدي يونس الصحي</option>
-                    <option value="مستشفى الأطفال">مستشفى الأطفال</option>
-                </select>
-                <div id="vaccineEditArea"></div>
-                <button onclick="saveAdminChanges()" style="background:green; color:white; padding:10px; width:100%; border:none; border-radius:5px; margin-top:10px;">حفظ</button>
-                <button onclick="document.getElementById('adminModal').remove()" style="width:100%; margin-top:5px; background:none; border:none;">إغلاق</button>
-            </div>
-        </div>`;
-    document.body.insertAdjacentHTML('beforeend', adminHTML);
-}
-
-function loadAdminVaccines() {
-    const center = document.getElementById('adminCenterSelect').value;
-    const vaccines = centersData[center] || [];
-    let html = '';
-    vaccines.forEach((v, index) => {
-        html += `<div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-            <span>${v.name}</span>
-            <input type="number" value="${v.count}" id="vac_count_${index}" style="width:60px; text-align:center;">
-        </div>`;
-    });
-    document.getElementById('vaccineEditArea').innerHTML = html;
-}
-
-function saveAdminChanges() {
-    const center = document.getElementById('adminCenterSelect').value;
-    const vaccines = centersData[center] || [];
-    vaccines.forEach((v, index) => {
-        v.count = parseInt(document.getElementById(`vac_count_${index}`).value);
-    });
-    alert("تم التحديث!");
-    document.getElementById('adminModal').remove();
-}
-
-// 7. تشغيل التلقائي
+// 8. تشغيل وإدارة القوائم
 document.addEventListener('DOMContentLoaded', () => {
     displayChildren();
     if (document.getElementById('childSelect')) populateChildSelect();
@@ -282,7 +200,7 @@ function toggleChildForm() {
 }
 
 function deleteChild(id) {
-    if (confirm("حذف سجل الطفل؟")) {
+    if (confirm("هل أنتِ متأكدة من حذف سجل هذا الطفل؟")) {
         let children = JSON.parse(localStorage.getItem('children')) || [];
         children = children.filter(c => c.id !== id);
         localStorage.setItem('children', JSON.stringify(children));
