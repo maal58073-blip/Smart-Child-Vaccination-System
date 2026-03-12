@@ -69,6 +69,14 @@ nav a:hover, nav a.active { background: #e0e7ff; color: var(--primary); }
     width: 100%; 
 }
 
+.children-container {
+    width: 100%;
+    max-width: 900px;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
 .child-card { 
     background: #ffffff; 
     border: 1px solid #e2e8f0; 
@@ -76,14 +84,12 @@ nav a:hover, nav a.active { background: #e0e7ff; color: var(--primary); }
     border-radius: 20px; 
     box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
     width: 100%;
-    margin-bottom: 25px;
 }
 
 /* جداول مرنة للجوال */
 .table-wrapper {
     width: 100%;
     overflow-x: auto; 
-    -webkit-overflow-scrolling: touch; 
     margin: 15px 0;
     border: 1px solid #f1f5f9;
     border-radius: 12px;
@@ -98,67 +104,55 @@ table {
 th, td { padding: 12px; border-bottom: 1px solid #f1f5f9; text-align: center; font-size: 0.95rem; }
 th { background-color: var(--primary); color: white; font-weight: 700; }
 
-/* حالات التطعيم */
 .status-done { background: #dcfce7; color: #16a34a; padding: 4px 12px; border-radius: 20px; font-weight: bold; font-size: 0.85rem; }
 .status-upcoming { background: #fef3c7; color: #92400e; padding: 4px 12px; border-radius: 20px; font-weight: bold; font-size: 0.85rem; }
 
-/* الأزرار وتأثيراتها */
-.btn { 
-    background: var(--primary); 
-    color: white; 
-    padding: 14px 25px; 
-    border-radius: 12px; 
-    font-weight: 700; 
-    border: none; 
-    cursor: pointer; 
-    transition: all 0.2s ease;
-    box-shadow: 0 4px 6px rgba(79, 70, 229, 0.2);
-}
-.btn:active { transform: scale(0.98); box-shadow: none; }
-.btn:hover { background: var(--primary-hover); }
-
-.btn-small { padding: 10px 15px; font-size: 0.9rem; cursor: pointer; border-radius: 8px; border: none; transition: 0.2s; }
-.btn-success { background: #10b981; color: white; }
-.btn-danger { background: #fee2e2; color: #ef4444; border: 1px solid #fecaca; }
-
-/* تنسيق الحقول */
-input, select {
-    border: 2px solid #e2e8f0;
-    border-radius: 10px;
-    padding: 12px;
-    outline: none;
-    transition: 0.3s;
-}
-input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
+.btn { background: var(--primary); color: white; padding: 14px 25px; border-radius: 12px; font-weight: 700; border: none; cursor: pointer; transition: 0.2s; }
+.btn-small { padding: 10px 15px; font-size: 0.9rem; cursor: pointer; border-radius: 8px; border: none; }
 
 footer { background: var(--dark-bg); color: #94a3b8; padding: 30px; text-align: center; margin-top: auto; }
 
-/* --- إعدادات الطباعة الرسمية --- */
+/* ========================================= */
+/* --- إعدادات الطباعة الرسمية (التعديل هنا) --- */
+/* ========================================= */
 @media print {
-    /* الخطوة الأهم: تحويل الحاوية من Flex إلى Block */
-    .children-container {
-        display: block !important; /* هذا السطر ينهي عناد المتصفح */
+    /* 1. إخفاء كل العناصر المزعجة في الطباعة */
+    nav, footer, .top-header, .add-child-section, .no-print, button, .btn { 
+        display: none !important; 
     }
 
-    .child-card {
+    /* 2. تحويل الجسم والحاويات إلى Block (إجباري لفصل الصفحات) */
+    body, .container, .children-container {
         display: block !important;
         width: 100% !important;
-        
-        /* إجبار الطابعة على القص بعد كل كرت */
-        page-break-after: always !important;
-        break-after: page !important;
-        
-        /* منع الكرت الواحد من الانقسام بين صفحتين */
-        page-break-inside: avoid !important;
-        
-        border: 1px solid #000 !important;
-        margin-bottom: 0 !important;
-        padding: 20px !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        background: white !important;
     }
+
+    /* 3. إجبار كل كرت طفل على أن يبدأ في صفحة جديدة تماماً */
+    .child-card { 
+        display: block !important;
+        width: 100% !important;
+        page-break-after: always !important; /* للمتصفحات القديمة */
+        break-after: page !important;        /* للمتصفحات الحديثة */
+        page-break-inside: avoid !important; /* لمنع انقسام الكرت الواحد */
+        
+        border: 2px solid #333 !important; /* حدود واضحة في الطباعة */
+        margin: 0 0 40px 0 !important;
+        padding: 30px !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+    }
+
+    /* 4. تحسين الجداول للورق */
+    table { border: 1px solid #000 !important; width: 100% !important; }
+    th { background: #f0f0f0 !important; color: black !important; border: 1px solid #000 !important; }
+    td { border: 1px solid #000 !important; color: black !important; }
 }
+
 /* تحسينات الجوال */
 @media screen and (max-width: 768px) {
     .top-header h1 { font-size: 1.5rem; }
     nav a { padding: 8px 12px; font-size: 0.85rem; }
-    .card { padding: 20px !important; }
 }
