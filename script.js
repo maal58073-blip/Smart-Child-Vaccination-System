@@ -56,9 +56,10 @@ document.addEventListener('change', function(e) {
     }
 });
 
-// 3. تأكيد الحجز والربط التلقائي بسجل الطفل
+// 3. تأكيد الحجز وإرسال التنبيه عبر الإيميل
 function confirmBooking() {
-    const childId = document.getElementById('childSelect')?.value;
+    const childSelect = document.getElementById('childSelect');
+    const childId = childSelect?.value;
     const center = document.getElementById('centerSelect')?.value;
     const selectedVac = document.querySelector('input[name="selectedVaccine"]:checked')?.value;
 
@@ -71,14 +72,37 @@ function confirmBooking() {
     const childIndex = children.findIndex(c => c.id == childId);
 
     if (childIndex !== -1) {
+        // تحديث بيانات الطفل محلياً
         children[childIndex].bookingStatus = `محجوز لـ (${selectedVac}) في: ${center}`;
         localStorage.setItem('children', JSON.stringify(children));
-        alert("تم ربط الحجز بنجاح! يمكنكِ الآن طباعة الكتيب المحدث.");
         displayChildren();
+
+        // إعداد بيانات الإيميل
+        const childName = childSelect.options[childSelect.selectedIndex].text;
+        const templateParams = {
+            child_name: childName,
+            center_name: center,
+            vaccine: selectedVac,
+            to_email: 'maal58073@gmail.com' // إيميلك الذي ستصل عليه التنبيهات
+        };
+
+        // مفاتيح EmailJS (الرجاء تغيير YOUR_SERVICE_ID بالرقم الخاص بك)
+        const serviceID = "service_b8wk5cq"; 
+        const templateID = "template_qrm8pcn";
+
+        // إرسال الإيميل
+        emailjs.send(serviceID, templateID, templateParams)
+            .then(function(response) {
+                console.log('SUCCESS!', response.status, response.text);
+                alert("تم ربط الحجز بنجاح! ✅ وتم إرسال تنبيه إلى بريدك الإلكتروني 📧");
+            }, function(error) {
+                console.log('FAILED...', error);
+                alert("تم الحجز بنجاح، ولكن حدث خطأ في إرسال الإيميل. (تأكدي من الأكواد)");
+            });
     }
 }
 
-// 4. حفظ طفل جديد مع قيد التاريخ (منع تواريخ المستقبل 2027+)
+// 4. حفظ طفل جديد مع قيد التاريخ 
 function saveNewChild() {
     const nameInput = document.getElementById('newChildName');
     const dateInput = document.getElementById('birthDate');
@@ -120,15 +144,15 @@ function saveNewChild() {
     alert("تم حفظ بيانات الطفل بنجاح! 🌸");
 }
 
-// 5. وظيفة تحديث حالة التطعيم يدوياً (تحويل من قادم إلى تم أخذها)
+// 5. وظيفة تحديث حالة التطعيم يدوياً 
 function markAsDone(childId, vaccineName) {
     let children = JSON.parse(localStorage.getItem('children')) || [];
     const childIndex = children.findIndex(c => c.id == childId);
     
     if (childIndex !== -1) {
+        const today = new Date().toLocaleDateString('ar-LY');
         const vacIndex = children[childIndex].vaccinations.findIndex(v => v.name === vaccineName);
         if (vacIndex !== -1) {
-            const today = new Date().toLocaleDateString('ar-LY');
             children[childIndex].vaccinations[vacIndex].status = "تم أخذها";
             children[childIndex].vaccinations[vacIndex].date = today;
             localStorage.setItem('children', JSON.stringify(children));
@@ -138,7 +162,7 @@ function markAsDone(childId, vaccineName) {
     }
 }
 
-// 6. عرض الكتيبات مع الترويسة الرسمية وأزرار التحكم
+// 6. عرض الكتيبات مع الترويسة الرسمية 
 function displayChildren() {
     const container = document.getElementById('childrenCardsContainer');
     if (!container) return;
@@ -219,8 +243,6 @@ function adminLogin() {
     const pass = prompt("أدخلي كلمة مرور المشرف للوصول للوحة التحكم:");
     if (pass === "admin2026") {
         alert("تم تسجيل الدخول بنجاح!");
-        // هنا يمكنكِ التوجيه لصفحة لوحة التحكم
-        // window.location.href = "admin.html"; 
     } else {
         alert("عذراً، كلمة المرور خاطئة!");
     }
