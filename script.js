@@ -129,6 +129,35 @@ function displayChildren() {
             const cls = v.status === "تم أخذها" ? "status-done" : "status-upcoming";
             rows += `<tr><td>${v.name}</td><td>${v.date}</td><td><span class="${cls}">${v.status}</span></td></tr>`;
         });
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+const today = new Date().toLocaleDateString('ar-LY', options);
+
+card.innerHTML = `
+    <div class="print-header-official">
+        <h2>دولة ليبيا</h2>
+        <h3>وزارة الصحة - إدارة التطعيمات</h3>
+        <p>${today}</p>
+        <hr>
+    </div>
+
+    <div class="child-info-header">
+        <h4>${child.name}</h4>
+        <p>تاريخ الميلاد: ${child.birthDate}</p>
+    </div>
+    
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>التطعيم</th>
+                    <th>التاريخ</th>
+                    <th>الحالة</th>
+                </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+        </table>
+    </div>
+`;
 
         card.innerHTML = `
             <div style="text-align:center; padding:10px; border-bottom:1px solid #eee; margin-bottom:10px;">
