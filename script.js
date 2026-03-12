@@ -72,7 +72,7 @@ function confirmBooking() {
     }
 }
 
-// 4. حفظ طفل جديد مع قيد التاريخ (منع 2027)
+// 4. حفظ طفل جديد
 function saveNewChild() {
     const nameInput = document.getElementById('newChildName');
     const dateInput = document.getElementById('birthDate');
@@ -86,7 +86,7 @@ function saveNewChild() {
     }
 
     if (birthDateValue > today) {
-        alert("خطأ: لا يمكن إدخال تاريخ في المستقبل! (سنة 2027 غير مقبولة حالياً)");
+        alert("خطأ: لا يمكن إدخال تاريخ في المستقبل!");
         return;
     }
 
@@ -114,97 +114,74 @@ function saveNewChild() {
     alert("تم حفظ بيانات الطفل بنجاح! 🌸");
 }
 
-// 5. عرض الكتيبات
+// 5. عرض الكتيبات (تم التعديل لدمج الترويسة والتاريخ بشكل صحيح)
 function displayChildren() {
     const container = document.getElementById('childrenCardsContainer');
     if (!container) return;
     const children = JSON.parse(localStorage.getItem('children')) || [];
     container.innerHTML = '';
 
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const todayStr = new Date().toLocaleDateString('ar-LY', options);
+
     children.forEach(child => {
         const card = document.createElement('div');
         card.className = 'child-card';
+        
         let rows = '';
         child.vaccinations.forEach(v => {
             const cls = v.status === "تم أخذها" ? "status-done" : "status-upcoming";
             rows += `<tr><td>${v.name}</td><td>${v.date}</td><td><span class="${cls}">${v.status}</span></td></tr>`;
         });
-        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-const today = new Date().toLocaleDateString('ar-LY', options);
 
-card.innerHTML = `
-    <div class="print-header-official">
-        <h2>دولة ليبيا</h2>
-        <h3>وزارة الصحة - إدارة التطعيمات</h3>
-        <p>${today}</p>
-        <hr>
-    </div>
-
-    <div class="child-info-header">
-        <h4>${child.name}</h4>
-        <p>تاريخ الميلاد: ${child.birthDate}</p>
-    </div>
-    
-    <div class="table-wrapper">
-        <table>
-            <thead>
-                <tr>
-                    <th>التطعيم</th>
-                    <th>التاريخ</th>
-                    <th>الحالة</th>
-                </tr>
-            </thead>
-            <tbody>${rows}</tbody>
-        </table>
-    </div>
-`;
-
+        // تم دمج الترويسة والمعلومات في مكان واحد لضمان عدم المسح
         card.innerHTML = `
-            <div style="text-align:center; padding:10px; border-bottom:1px solid #eee; margin-bottom:10px;">
-                <h3 style="margin:0; color:#4f46e5;">${child.name}</h3>
-                <p style="font-size:0.9rem; color:#666; margin:5px 0;">تاريخ الميلاد: ${child.birthDate}</p>
-                <p style="color:green; font-weight:bold; font-size:0.85rem;">📍 ${child.bookingStatus}</p>
+            <div class="print-header-official">
+                <h2>دولة ليبيا</h2>
+                <h3>وزارة الصحة - إدارة التطعيمات</h3>
+                <p>تاريخ الطباعة: ${todayStr}</p>
+                <hr>
             </div>
+
+            <div style="text-align:center; padding:10px; margin-bottom:10px;">
+                <h3 style="margin:0; color:#4f46e5; font-size:1.5rem;">الاسم: ${child.name}</h3>
+                <p style="font-size:1rem; color:#666; margin:5px 0;">تاريخ الميلاد: <b>${child.birthDate}</b></p>
+                <p style="color:green; font-weight:bold; font-size:0.9rem;">📍 ${child.bookingStatus}</p>
+            </div>
+
             <div class="table-wrapper">
                 <table>
-                    <thead><tr><th>التطعيم</th><th>التاريخ</th><th>الحالة</th></tr></thead>
+                    <thead>
+                        <tr>
+                            <th>التطعيم</th>
+                            <th>التاريخ</th>
+                            <th>الحالة</th>
+                        </tr>
+                    </thead>
                     <tbody>${rows}</tbody>
                 </table>
             </div>
+
             <div class="no-print" style="display:flex; gap:10px; margin-top:15px;">
-                <button onclick="printSpecificChild()" class="btn-small btn-success" style="flex:2;">حفظ/طباعة الكتيب (PDF) 🖨️</button>
+                <button onclick="window.print()" class="btn-small btn-success" style="flex:2;">حفظ/طباعة الكتيبات (PDF) 🖨️</button>
                 <button onclick="deleteChild(${child.id})" class="btn-small btn-danger" style="flex:1;">حذف</button>
             </div>`;
+            
         container.appendChild(card);
     });
 }
 
-// 6. الطباعة الاحترافية
-function printSpecificChild() {
-    const now = new Date();
-    const dateStr = now.toLocaleDateString('ar-LY', { year: 'numeric', month: 'long', day: 'numeric' });
-    const dayStr = now.toLocaleDateString('ar-LY', { weekday: 'long' });
-    
-    const dateElem = document.getElementById('print-date-today');
-    const dayElem = document.getElementById('print-day-today');
-    const headerElem = document.getElementById('official-print-header');
-    
-    if(dateElem) dateElem.innerText = "بتاريخ: " + dateStr;
-    if(dayElem) dayElem.innerText = "يوم: " + dayStr;
-    if(headerElem) headerElem.style.display = "block";
-
-    window.print();
-    if(headerElem) headerElem.style.display = "none";
+// 6. حذف طفل
+function deleteChild(id) {
+    if (confirm("هل أنتِ متأكدة من حذف سجل هذا الطفل؟")) {
+        let children = JSON.parse(localStorage.getItem('children')) || [];
+        children = children.filter(c => c.id !== id);
+        localStorage.setItem('children', JSON.stringify(children));
+        displayChildren();
+    }
 }
 
-// 7. حماية الإدارة (كلمة المرور)
-function adminLogin() {
-    const pass = prompt("أدخلي كلمة مرور المشرف:");
-    if (pass === "admin2026") showAdminPanel();
-    else alert("عذراً، كلمة المرور خاطئة!");
-}
-
-// 8. تشغيل وإدارة القوائم
+// 7. تشغيل وإدارة القوائم عند التحميل
 document.addEventListener('DOMContentLoaded', () => {
     displayChildren();
     if (document.getElementById('childSelect')) populateChildSelect();
@@ -226,13 +203,4 @@ function populateChildSelect() {
 function toggleChildForm() {
     const form = document.getElementById('addChildForm');
     if(form) form.style.display = (form.style.display === 'none' || form.style.display === '') ? 'block' : 'none';
-}
-
-function deleteChild(id) {
-    if (confirm("هل أنتِ متأكدة من حذف سجل هذا الطفل؟")) {
-        let children = JSON.parse(localStorage.getItem('children')) || [];
-        children = children.filter(c => c.id !== id);
-        localStorage.setItem('children', JSON.stringify(children));
-        displayChildren();
-    }
 }
