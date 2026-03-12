@@ -135,27 +135,25 @@ footer { background: var(--dark-bg); color: #94a3b8; padding: 30px; text-align: 
 
 /* --- إعدادات الطباعة الرسمية --- */
 @media print {
-    /* 1. إخفاء كل شيء ما عدا الكتيبات */
-    .no-print, nav, footer, .top-header, .add-child-section, button, .btn { 
-        display: none !important; 
+    /* الخطوة الأهم: تحويل الحاوية من Flex إلى Block */
+    .children-container {
+        display: block !important; /* هذا السطر ينهي عناد المتصفح */
     }
 
-    /* 2. تحويل الحاوية لـ Block (هذا هو السر) */
-    .container, .children-container {
+    .child-card {
         display: block !important;
         width: 100% !important;
-    }
-
-    /* 3. إجبار كل كارت طفل على البدء في صفحة جديدة */
-    .child-card { 
-        display: block !important;
-        width: 100% !important;
-        page-break-after: always !important; /* لنسخ المتصفحات القديمة */
-        break-after: page !important;        /* لنسخ المتصفحات الحديثة */
-        page-break-inside: avoid !important; /* لمنع انقسام الكارت الواحد بين صفحتين */
+        
+        /* إجبار الطابعة على القص بعد كل كرت */
+        page-break-after: always !important;
+        break-after: page !important;
+        
+        /* منع الكرت الواحد من الانقسام بين صفحتين */
+        page-break-inside: avoid !important;
+        
+        border: 1px solid #000 !important;
         margin-bottom: 0 !important;
-        border: 2px solid #000 !important; /* لضمان وضوح الحدود عند الطباعة */
-        padding: 30px !important;
+        padding: 20px !important;
     }
 }
 /* تحسينات الجوال */
