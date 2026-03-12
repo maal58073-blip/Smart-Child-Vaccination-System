@@ -1,8 +1,14 @@
-// 1. قاعدة بيانات المراكز والتطعيمات
+// 1. قاعدة بيانات المراكز والتطعيمات (محدثة ببيانات خاصة لكل مركز)
 const centersData = {
+    "مركز الفويهات الصحي": [
+        { name: "شلل الأطفال", count: 120, date: "2026-03-15" },
+        { name: "الخماسي", count: 35, date: "2026-03-18" },
+        { name: "الروتا", count: 60, date: "2026-03-25" }
+    ],
     "مركز بنغازي الطبي": [
-        { name: "شلل الأطفال", count: 50, date: "2026-03-20" },
-        { name: "الخماسي", count: 12, date: "2026-03-22" }
+        { name: "شلل الأطفال", count: 200, date: "2026-03-20" },
+        { name: "الخماسي", count: 12, date: "2026-03-22" },
+        { name: "الحصبة", count: 90, date: "2026-04-05" }
     ],
     "مركز سيدي يونس الصحي": [
         { name: "الثلاثي", count: 30, date: "2026-03-25" },
@@ -14,7 +20,7 @@ const centersData = {
     ]
 };
 
-// 2. تحديث جدول المواعيد عند اختيار المركز
+// 2. تحديث جدول المواعيد ديناميكياً حسب المركز المختار
 document.addEventListener('change', function(e) {
     if (e.target && e.target.id === 'centerSelect') {
         const center = e.target.value;
@@ -22,15 +28,15 @@ document.addEventListener('change', function(e) {
         if (!infoArea) return;
 
         const vaccines = centersData[center] || [];
-        let tableHTML = `<p style="margin-top:15px;"><b>المواعيد المتاحة في ${center}:</b></p>
+        let tableHTML = `<p style="margin-top:15px;"><b>المواعيد والكميات المتاحة في ${center}:</b></p>
             <div class="table-wrapper">
                 <table>
                     <thead>
                         <tr>
                             <th>اختيار</th>
                             <th>التطعيم</th>
-                            <th>الكمية</th>
-                            <th>التاريخ</th>
+                            <th>المتوفر (جرعة)</th>
+                            <th>التاريخ المتاح</th>
                         </tr>
                     </thead>
                     <tbody>`;
@@ -50,7 +56,7 @@ document.addEventListener('change', function(e) {
     }
 });
 
-// 3. تأكيد الحجز والربط التلقائي
+// 3. تأكيد الحجز والربط التلقائي بسجل الطفل
 function confirmBooking() {
     const childId = document.getElementById('childSelect')?.value;
     const center = document.getElementById('centerSelect')?.value;
@@ -67,12 +73,12 @@ function confirmBooking() {
     if (childIndex !== -1) {
         children[childIndex].bookingStatus = `محجوز لـ (${selectedVac}) في: ${center}`;
         localStorage.setItem('children', JSON.stringify(children));
-        alert("تم ربط الحجز بنجاح! جاري توجيهك لصفحة الكتيب...");
-        window.location.href = "dashboard.html";
+        alert("تم ربط الحجز بنجاح! يمكنكِ الآن طباعة الكتيب المحدث.");
+        displayChildren();
     }
 }
 
-// 4. حفظ طفل جديد
+// 4. حفظ طفل جديد مع قيد التاريخ (منع تواريخ المستقبل 2027+)
 function saveNewChild() {
     const nameInput = document.getElementById('newChildName');
     const dateInput = document.getElementById('birthDate');
@@ -86,7 +92,7 @@ function saveNewChild() {
     }
 
     if (birthDateValue > today) {
-        alert("خطأ: لا يمكن إدخال تاريخ في المستقبل!");
+        alert("خطأ: لا يمكن إدخال تاريخ في المستقبل! الطفل لم يولد بعد أو التاريخ غير صحيح.");
         return;
     }
 
@@ -94,7 +100,7 @@ function saveNewChild() {
         id: Date.now(),
         name: name,
         birthDate: birthDateValue,
-        bookingStatus: "لا يوجد حجز نشط",
+        bookingStatus: "لا يوجد حجز نشط حالياً",
         vaccinations: [
             { name: "عند الولادة", status: "تم أخذها", date: birthDateValue },
             { name: "شهرين", status: "قادم", date: "معلق" },
@@ -114,7 +120,25 @@ function saveNewChild() {
     alert("تم حفظ بيانات الطفل بنجاح! 🌸");
 }
 
-// 5. عرض الكتيبات (تم التعديل لدمج الترويسة والتاريخ بشكل صحيح)
+// 5. وظيفة تحديث حالة التطعيم يدوياً (تحويل من قادم إلى تم أخذها)
+function markAsDone(childId, vaccineName) {
+    let children = JSON.parse(localStorage.getItem('children')) || [];
+    const childIndex = children.findIndex(c => c.id == childId);
+    
+    if (childIndex !== -1) {
+        const vacIndex = children[childIndex].vaccinations.findIndex(v => v.name === vaccineName);
+        if (vacIndex !== -1) {
+            const today = new Date().toLocaleDateString('ar-LY');
+            children[childIndex].vaccinations[vacIndex].status = "تم أخذها";
+            children[childIndex].vaccinations[vacIndex].date = today;
+            localStorage.setItem('children', JSON.stringify(children));
+            displayChildren();
+            alert("تم تحديث الكتيب! الحالة الآن: تم أخذ التطعيمة ✅");
+        }
+    }
+}
+
+// 6. عرض الكتيبات مع الترويسة الرسمية وأزرار التحكم
 function displayChildren() {
     const container = document.getElementById('childrenCardsContainer');
     if (!container) return;
@@ -130,11 +154,19 @@ function displayChildren() {
         
         let rows = '';
         child.vaccinations.forEach(v => {
-            const cls = v.status === "تم أخذها" ? "status-done" : "status-upcoming";
-            rows += `<tr><td>${v.name}</td><td>${v.date}</td><td><span class="${cls}">${v.status}</span></td></tr>`;
+            const isDone = v.status === "تم أخذها";
+            const cls = isDone ? "status-done" : "status-upcoming";
+            
+            rows += `<tr>
+                <td>${v.name}</td>
+                <td>${v.date}</td>
+                <td><span class="${cls}">${v.status}</span></td>
+                <td class="no-print">
+                    ${!isDone ? `<button onclick="markAsDone(${child.id}, '${v.name}')" class="btn-small btn-success" style="font-size:0.7rem;">تحديث</button>` : '✅'}
+                </td>
+            </tr>`;
         });
 
-        // تم دمج الترويسة والمعلومات في مكان واحد لضمان عدم المسح
         card.innerHTML = `
             <div class="print-header-official">
                 <h2>دولة ليبيا</h2>
@@ -156,6 +188,7 @@ function displayChildren() {
                             <th>التطعيم</th>
                             <th>التاريخ</th>
                             <th>الحالة</th>
+                            <th class="no-print">إجراء</th>
                         </tr>
                     </thead>
                     <tbody>${rows}</tbody>
@@ -163,7 +196,7 @@ function displayChildren() {
             </div>
 
             <div class="no-print" style="display:flex; gap:10px; margin-top:15px;">
-                <button onclick="window.print()" class="btn-small btn-success" style="flex:2;">حفظ/طباعة الكتيبات (PDF) 🖨️</button>
+                <button onclick="window.print()" class="btn-small btn-success" style="flex:2;">حفظ كـ PDF / طباعة 🖨️</button>
                 <button onclick="deleteChild(${child.id})" class="btn-small btn-danger" style="flex:1;">حذف</button>
             </div>`;
             
@@ -171,9 +204,9 @@ function displayChildren() {
     });
 }
 
-// 6. حذف طفل
+// 7. حذف طفل
 function deleteChild(id) {
-    if (confirm("هل أنتِ متأكدة من حذف سجل هذا الطفل؟")) {
+    if (confirm("هل أنتِ متأكدة من حذف سجل هذا الطفل نهائياً؟")) {
         let children = JSON.parse(localStorage.getItem('children')) || [];
         children = children.filter(c => c.id !== id);
         localStorage.setItem('children', JSON.stringify(children));
@@ -181,7 +214,19 @@ function deleteChild(id) {
     }
 }
 
-// 7. تشغيل وإدارة القوائم عند التحميل
+// 8. حماية المشرف بكلمة مرور
+function adminLogin() {
+    const pass = prompt("أدخلي كلمة مرور المشرف للوصول للوحة التحكم:");
+    if (pass === "admin2026") {
+        alert("تم تسجيل الدخول بنجاح!");
+        // هنا يمكنكِ التوجيه لصفحة لوحة التحكم
+        // window.location.href = "admin.html"; 
+    } else {
+        alert("عذراً، كلمة المرور خاطئة!");
+    }
+}
+
+// 9. تشغيل وإدارة القوائم عند التحميل
 document.addEventListener('DOMContentLoaded', () => {
     displayChildren();
     if (document.getElementById('childSelect')) populateChildSelect();
