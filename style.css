@@ -135,37 +135,43 @@ footer { background: var(--dark-bg); color: #94a3b8; padding: 30px; text-align: 
 
 /* --- إعدادات الطباعة الرسمية --- */
 @media print {
-    /* إخفاء العناصر غير الضرورية */
-    .no-print, nav, footer, .top-header, .add-child-section, button, .btn-small { 
+    /* 1. إخفاء العناصر غير الضرورية */
+    .no-print, nav, footer, .top-header, .add-child-section, button, .btn, .btn-small { 
         display: none !important; 
     }
 
-    body { background: white !important; }
+    /* 2. تحويل الحاوية الرئيسية إلى عرض كتلي (ضروري جداً لفصل الصفحات) */
+    .container, .children-container {
+        display: block !important;
+        width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
 
-    /* هذا الجزء هو المسؤول عن فصل الصفحات */
+    /* 3. إجبار كل كرت على البدء في صفحة جديدة */
     .child-card { 
         display: block !important;
-       /* الخصائص التالية هي التي تجبر كل طفل على الظهور في صفحة مستقلة */
-        page-break-after: always !important; 
-        break-after: page !important;
-        
-        /* تحسين التنسيق للطباعة */
-        margin: 0 0 50px 0 !important;
-        border: 1px solid #000 !important;
-        padding: 30px !important;
         width: 100% !important;
-    }
+        border: 1px solid #333 !important;
+        padding: 30px !important;
+        margin-bottom: 0 !important;
         
-        /* إجبار المتصفح على الانتقال لصفحة جديدة بعد كل كرت */
+        /* الأوامر السحرية لفصل الصفحات */
         page-break-after: always !important; 
         break-after: page !important;
+        page-break-inside: avoid !important;
     }
 
-    /* تحسين شكل الجداول عند الطباعة لتكون واضحة */
-    table { width: 100% !important; border: 1px solid #000 !important; }
-    th, td { border: 1px solid #000 !important; padding: 10px !important; color: black !important; }
+    /* 4. تحسين شكل الجداول لتملأ الصفحة */
+    table { 
+        width: 100% !important; 
+        border-collapse: collapse !important;
+    }
+    th, td { 
+        border: 1px solid #333 !important; 
+        padding: 10px !important;
+    }
 }
-
 
 /* تحسينات الجوال */
 @media screen and (max-width: 768px) {
