@@ -1,4 +1,4 @@
-// 1. قاعدة بيانات المراكز والتطعيمات (محدثة ببيانات خاصة لكل مركز)
+// 1. قاعدة بيانات المراكز والتطعيمات
 const centersData = {
     "مركز الفويهات الصحي": [
         { name: "شلل الأطفال", count: 120, date: "2026-03-15" },
@@ -20,7 +20,7 @@ const centersData = {
     ]
 };
 
-// 2. تحديث جدول المواعيد ديناميكياً حسب المركز المختار
+// 2. تحديث جدول المواعيد
 document.addEventListener('change', function(e) {
     if (e.target && e.target.id === 'centerSelect') {
         const center = e.target.value;
@@ -56,7 +56,7 @@ document.addEventListener('change', function(e) {
     }
 });
 
-// 3. تأكيد الحجز وإرسال التنبيه عبر الإيميل
+// 3. تأكيد الحجز وإرسال الإيميل (معدل بالمعرفات الخاصة بكِ)
 function confirmBooking() {
     const childSelect = document.getElementById('childSelect');
     const childId = childSelect?.value;
@@ -72,51 +72,42 @@ function confirmBooking() {
     const childIndex = children.findIndex(c => c.id == childId);
 
     if (childIndex !== -1) {
-        // تحديث بيانات الطفل محلياً
         children[childIndex].bookingStatus = `محجوز لـ (${selectedVac}) في: ${center}`;
         localStorage.setItem('children', JSON.stringify(children));
         displayChildren();
 
-        // إعداد بيانات الإيميل
+        // بيانات الإرسال
         const childName = childSelect.options[childSelect.selectedIndex].text;
         const templateParams = {
             child_name: childName,
             center_name: center,
             vaccine: selectedVac,
-            to_email: 'maal58073@gmail.com' // إيميلك الذي ستصل عليه التنبيهات
+            to_email: 'maal58073@gmail.com'
         };
 
-        // مفاتيح EmailJS (الرجاء تغيير YOUR_SERVICE_ID بالرقم الخاص بك)
+        // مفاتيحك الخاصة التي أرسلتِها
         const serviceID = "service_b8wk5cq"; 
         const templateID = "template_qrm8pcn";
 
-        // إرسال الإيميل
         emailjs.send(serviceID, templateID, templateParams)
-            .then(function(response) {
-                console.log('SUCCESS!', response.status, response.text);
+            .then(function() {
                 alert("تم ربط الحجز بنجاح! ✅ وتم إرسال تنبيه إلى بريدك الإلكتروني 📧");
             }, function(error) {
-                console.log('FAILED...', error);
-                alert("تم الحجز بنجاح، ولكن حدث خطأ في إرسال الإيميل. (تأكدي من الأكواد)");
+                console.error("EmailJS Error:", error);
+                alert("تم الحجز محلياً، ولكن فشل إرسال الإيميل. تأكدي من الاتصال بالإنترنت.");
             });
     }
 }
 
-// 4. حفظ طفل جديد مع قيد التاريخ 
+// 4. حفظ طفل جديد
 function saveNewChild() {
     const nameInput = document.getElementById('newChildName');
     const dateInput = document.getElementById('birthDate');
     const name = nameInput.value.trim();
     const birthDateValue = dateInput.value;
-    const today = new Date().toISOString().split('T')[0];
 
     if (!name || !birthDateValue) {
         alert("يرجى إدخال البيانات كاملة!");
-        return;
-    }
-
-    if (birthDateValue > today) {
-        alert("خطأ: لا يمكن إدخال تاريخ في المستقبل! الطفل لم يولد بعد أو التاريخ غير صحيح.");
         return;
     }
 
@@ -142,13 +133,13 @@ function saveNewChild() {
     if(document.getElementById('addChildForm')) toggleChildForm();
     displayChildren();
     alert("تم حفظ بيانات الطفل بنجاح! 🌸");
+    if (document.getElementById('childSelect')) populateChildSelect();
 }
 
-// 5. وظيفة تحديث حالة التطعيم يدوياً 
+// باقي الوظائف (تحديث، حذف، عرض)
 function markAsDone(childId, vaccineName) {
     let children = JSON.parse(localStorage.getItem('children')) || [];
     const childIndex = children.findIndex(c => c.id == childId);
-    
     if (childIndex !== -1) {
         const today = new Date().toLocaleDateString('ar-LY');
         const vacIndex = children[childIndex].vaccinations.findIndex(v => v.name === vaccineName);
@@ -157,98 +148,40 @@ function markAsDone(childId, vaccineName) {
             children[childIndex].vaccinations[vacIndex].date = today;
             localStorage.setItem('children', JSON.stringify(children));
             displayChildren();
-            alert("تم تحديث الكتيب! الحالة الآن: تم أخذ التطعيمة ✅");
         }
     }
 }
 
-// 6. عرض الكتيبات مع الترويسة الرسمية 
 function displayChildren() {
     const container = document.getElementById('childrenCardsContainer');
     if (!container) return;
     const children = JSON.parse(localStorage.getItem('children')) || [];
     container.innerHTML = '';
 
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    const todayStr = new Date().toLocaleDateString('ar-LY', options);
-
     children.forEach(child => {
         const card = document.createElement('div');
         card.className = 'child-card';
-        
         let rows = '';
         child.vaccinations.forEach(v => {
             const isDone = v.status === "تم أخذها";
-            const cls = isDone ? "status-done" : "status-upcoming";
-            
-            rows += `<tr>
-                <td>${v.name}</td>
-                <td>${v.date}</td>
-                <td><span class="${cls}">${v.status}</span></td>
-                <td class="no-print">
-                    ${!isDone ? `<button onclick="markAsDone(${child.id}, '${v.name}')" class="btn-small btn-success" style="font-size:0.7rem;">تحديث</button>` : '✅'}
-                </td>
-            </tr>`;
+            rows += `<tr><td>${v.name}</td><td>${v.date}</td><td><span class="${isDone ? 'status-done' : 'status-upcoming'}">${v.status}</span></td><td class="no-print">${!isDone ? `<button onclick="markAsDone(${child.id}, '${v.name}')" class="btn-small btn-success">تحديث</button>` : '✅'}</td></tr>`;
         });
 
-        card.innerHTML = `
-            <div class="print-header-official">
-                <h2>دولة ليبيا</h2>
-                <h3>وزارة الصحة - إدارة التطعيمات</h3>
-                <p>تاريخ الطباعة: ${todayStr}</p>
-                <hr>
-            </div>
-
-            <div style="text-align:center; padding:10px; margin-bottom:10px;">
-                <h3 style="margin:0; color:#4f46e5; font-size:1.5rem;">الاسم: ${child.name}</h3>
-                <p style="font-size:1rem; color:#666; margin:5px 0;">تاريخ الميلاد: <b>${child.birthDate}</b></p>
-                <p style="color:green; font-weight:bold; font-size:0.9rem;">📍 ${child.bookingStatus}</p>
-            </div>
-
-            <div class="table-wrapper">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>التطعيم</th>
-                            <th>التاريخ</th>
-                            <th>الحالة</th>
-                            <th class="no-print">إجراء</th>
-                        </tr>
-                    </thead>
-                    <tbody>${rows}</tbody>
-                </table>
-            </div>
-
-            <div class="no-print" style="display:flex; gap:10px; margin-top:15px;">
-                <button onclick="window.print()" class="btn-small btn-success" style="flex:2;">حفظ كـ PDF / طباعة 🖨️</button>
-                <button onclick="deleteChild(${child.id})" class="btn-small btn-danger" style="flex:1;">حذف</button>
-            </div>`;
-            
+        card.innerHTML = `<div class="print-header-official"><h2>دولة ليبيا</h2><h3>وزارة الصحة</h3><hr></div><div style="text-align:center;"><h3>الاسم: ${child.name}</h3><p>الميلاد: ${child.birthDate}</p><p style="color:green;">📍 ${child.bookingStatus}</p></div><table><thead><tr><th>التطعيم</th><th>التاريخ</th><th>الحالة</th><th class="no-print">إجراء</th></tr></thead><tbody>${rows}</tbody></table><div class="no-print" style="margin-top:15px;"><button onclick="window.print()" class="btn-small btn-success">طباعة 🖨️</button> <button onclick="deleteChild(${child.id})" class="btn-small btn-danger">حذف</button></div>`;
         container.appendChild(card);
     });
 }
 
-// 7. حذف طفل
 function deleteChild(id) {
-    if (confirm("هل أنتِ متأكدة من حذف سجل هذا الطفل نهائياً؟")) {
+    if (confirm("حذف سجل الطفل؟")) {
         let children = JSON.parse(localStorage.getItem('children')) || [];
         children = children.filter(c => c.id !== id);
         localStorage.setItem('children', JSON.stringify(children));
         displayChildren();
+        if (document.getElementById('childSelect')) populateChildSelect();
     }
 }
 
-// 8. حماية المشرف بكلمة مرور
-function adminLogin() {
-    const pass = prompt("أدخلي كلمة مرور المشرف للوصول للوحة التحكم:");
-    if (pass === "admin2026") {
-        alert("تم تسجيل الدخول بنجاح!");
-    } else {
-        alert("عذراً، كلمة المرور خاطئة!");
-    }
-}
-
-// 9. تشغيل وإدارة القوائم عند التحميل
 document.addEventListener('DOMContentLoaded', () => {
     displayChildren();
     if (document.getElementById('childSelect')) populateChildSelect();
