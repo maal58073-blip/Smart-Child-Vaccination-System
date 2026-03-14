@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة تحكم الإدارة - منظومة .صغارنا</title>
+    <title>لوحة تحكم الإدارة - منظومة صغارنا</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* تأمين المحتوى حتى إدخال كلمة المرور */
         #adminContent { display: none; }
         
         .stats-grid { 
@@ -23,15 +22,25 @@
             text-align: center; 
             transition: 0.3s;
             border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
         }
 
-        .stat-card h3 { font-size: 2.5rem; color: var(--primary); margin-bottom: 5px; }
-        .stat-card p { color: var(--text-main); font-weight: 600; }
+        .stat-card h3 { font-size: 2.8rem; color: var(--primary); margin-bottom: 5px; }
+        .stat-card p { color: var(--text-main); font-weight: 700; font-size: 1rem; }
         
         .admin-actions {
             margin-top: 40px;
-            padding-top: 20px;
-            border-top: 2px dashed #e2e8f0;
+            padding: 25px;
+            background: #fff;
+            border-radius: 15px;
+            border: 2px dashed #cbd5e1;
+        }
+
+        .actions-grid {
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+            gap: 15px;
+            margin-top: 15px;
         }
     </style>
 </head>
@@ -39,21 +48,20 @@
     
     <div id="adminContent">
         <header class="top-header">
-            <h1> لوحة تحكم المشرف - <i class="fa-solid fa-user-gear"></i></h1>
-            <p> نهتم بمستقبل أطفالكم من خلال توفير رعاية صحية ذكية وسهولة الوصول.
-                إدارة منظومة صغارنا - بنغازي 2026 .</p>
+            <h1> لوحة تحكم المشرف <i class="fa-solid fa-user-gear"></i></h1>
+            <p>إدارة منظومة صغارنا - بنغازي 2026</p>
         </header>
 
         <nav class="no-print">
-            <a href="index.html">الرئيسية</a>
-            <a href="dashboard.html">الكتيب الإلكتروني</a>
-            <a href="booking.html">الحجوزات</a>
+            <a href="index.html"><i class="fa-solid fa-house"></i> الرئيسية</a>
+            <a href="dashboard.html"><i class="fa-solid fa-book-medical"></i> الكتيبات</a>
+            <a href="booking.html"><i class="fa-solid fa-calendar-check"></i> الحجوزات</a>
             <a href="#" onclick="logoutAdmin()" style="color: var(--danger);">تسجيل خروج <i class="fa-solid fa-right-from-bracket"></i></a>
         </nav>
 
         <div class="container">
-            <div class="card" style="max-width: 900px;">
-                <h2 style="color: var(--dark-bg);"><i class="fa-solid fa-chart-line"></i> إحصائيات النظام الحالية</h2>
+            <div class="card" style="max-width: 900px; width: 100%;">
+                <h2 style="color: var(--dark-bg); text-align: right;"><i class="fa-solid fa-chart-line"></i> إحصائيات النظام الحالية</h2>
                 
                 <div class="stats-grid">
                     <div class="stat-card" style="background: #f5f3ff;">
@@ -61,79 +69,88 @@
                         <p>إجمالي الأطفال المسجلين</p>
                     </div>
                     <div class="stat-card" style="background: #ecfdf5;">
-                        <h3 id="bookingCount">0</h3>
+                        <h3 id="bookingCount" style="color: #10b981;">0</h3>
+                        <p>حجوزات بانتظار التطعيم</p>
                     </div>
                 </div>
 
                 <div class="admin-actions">
-                    <h3 style="text-align: right; margin-bottom: 15px;"><i class="fa-solid fa-screwdriver-wrench"></i> إجراءات سريعة</h3>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                        <button class="btn" onclick="sendAlert()" style="background: var(--success);">
-                            إرسال تنبيهات جماعية للأمهات <i class="fa-solid fa-bell"></i>
+                    <h3 style="text-align: right; margin-bottom: 15px; color: var(--dark-bg);">
+                        <i class="fa-solid fa-screwdriver-wrench"></i> إجراءات سريعة
+                    </h3>
+                    <div class="actions-grid">
+                        <button class="btn" onclick="sendAlert()" style="background: var(--success); display: flex; align-items: center; justify-content: center; gap: 10px;">
+                            <span>إرسال تنبيهات جماعية للأمهات</span> <i class="fa-solid fa-bell"></i>
                         </button>
-                        <button class="btn btn-danger" onclick="clearSystemData()" style="background: var(--danger);">
-                            تصفير كافة بيانات النظام <i class="fa-solid fa-trash-can"></i>
+                        <button class="btn" onclick="clearSystemData()" style="background: var(--danger); display: flex; align-items: center; justify-content: center; gap: 10px;">
+                            <span>تصفير بيانات الأطفال</span> <i class="fa-solid fa-trash-can"></i>
                         </button>
                     </div>
                 </div>
             </div>
         </div>
 
-         <footer>
-        <p>جميع الحقوق محفوظة &copy; 2026 - منظومة صغارنا للتطعيمات</p>
-        <p>بنغازي - ليبيا | حماية أطفالنا مسؤوليتنا <i class="fa-solid fa-heart" style="color:#ef4444;"></i></p>
-    </footer>
-        
+        <footer>
+            <p>جميع الحقوق محفوظة &copy; 2026 - منظومة صغارنا للتطعيمات</p>
+            <p>بنغازي - ليبيا | حماية أطفالنا مسؤوليتنا ❤️</p>
+        </footer>
     </div>
 
     <script>
-        // 1. وظيفة الحماية بكلمة مرور
+        // 1. وظيفة الحماية بكلمة مرور مع حفظ الجلسة
         function checkAdminAuth() {
-            // ملاحظة: كلمة المرور هي admin2026 كما طلبتِ
-            const pass = prompt("أدخلي كلمة مرور المشرف للدخول:");
+            // التحقق إذا كان الأدمن قد سجل دخوله بالفعل في هذه الجلسة
+            if (sessionStorage.getItem('adminLoggedIn') === 'true') {
+                document.getElementById('adminContent').style.display = 'block';
+                loadStats();
+                return;
+            }
+
+            const pass = prompt("أدخلي كلمة مرور المشرف (admin2026):");
             if (pass === "admin2026") {
+                sessionStorage.setItem('adminLoggedIn', 'true');
                 document.getElementById('adminContent').style.display = 'block';
                 loadStats();
             } else {
-                alert("عذراً، كلمة المرور خاطئة. سيتم توجيهك للرئيسية.");
+                alert("عذراً، كلمة المرور خاطئة!");
                 window.location.href = "index.html";
             }
         }
 
-        // 2. جلب الإحصائيات الحقيقية
+        // 2. جلب الإحصائيات الحقيقية المحدثة
         function loadStats() {
             try {
                 const children = JSON.parse(localStorage.getItem('children')) || [];
                 document.getElementById('childCount').innerText = children.length;
                 
-                let doneCount = 0;
+                // حساب الحجوزات النشطة (التي تحتوي على كلمة "محجوز")
+                let activeBookings = 0;
                 children.forEach(child => {
-                    if(child.vaccinations) {
-                        child.vaccinations.forEach(v => {
-                            if (v.status === "تم أخذها") doneCount++;
-                        });
+                    if (child.bookingStatus && child.bookingStatus.includes("محجوز")) {
+                        activeBookings++;
                     }
                 });
-                document.getElementById('bookingCount').innerText = doneCount;
+                document.getElementById('bookingCount').innerText = activeBookings;
             } catch (e) {
                 console.error("خطأ في قراءة البيانات:", e);
             }
         }
 
         function sendAlert() {
-            alert("تم الاتصال بالنظام بنجاح.. جاري إرسال التنبيهات لجميع المسجلين! ✅");
+            alert("تم الاتصال بسيرفر الرسائل.. جاري إرسال تنبيهات المواعيد لجميع الأمهات المسجلات! 🔔✅");
         }
 
         function clearSystemData() {
-            if(confirm("تحذير شديد: سيتم مسح كافة السجلات نهائياً. هل أنتِ متأكدة؟")) {
-                localStorage.removeItem('children'); // يفضل مسح بيانات الأطفال فقط وليس كل شيء
-                alert("تم تصفير بيانات الأطفال بنجاح.");
+            if(confirm("تحذير: سيتم مسح كافة سجلات الأطفال والحجوزات نهائياً. هل أنتِ متأكدة؟")) {
+                localStorage.removeItem('children');
+                alert("تم تصفير النظام بنجاح.");
                 location.reload();
             }
         }
 
         function logoutAdmin() {
-            if(confirm("هل تريدين تسجيل الخروج؟")) {
+            if(confirm("هل تريدين تسجيل الخروج من لوحة التحكم؟")) {
+                sessionStorage.removeItem('adminLoggedIn');
                 window.location.href = "index.html";
             }
         }
