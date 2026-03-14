@@ -80,8 +80,24 @@ function checkAuth() {
 function saveNewChild() {
     const name = document.getElementById('newChildName').value.trim();
     const birthDateValue = document.getElementById('birthDate').value;
-    if (!name || !birthDateValue) { alert("أكملي البيانات!"); return; }
+    
+    // 1. الحصول على تاريخ اليوم بدقة
+    const today = new Date();
+    const selectedDate = new Date(birthDateValue);
 
+    // 2. التحقق من ملء البيانات
+    if (!name || !birthDateValue) { 
+        alert("من فضلكِ، أدخلي اسم الطفل وتاريخ الميلاد!"); 
+        return; 
+    }
+
+    // 3. منع التواريخ المستقبلية (الحل لمشكلتك)
+    if (selectedDate > today) {
+        alert("عذراً! لا يمكن تسجيل تاريخ ميلاد في المستقبل. يرجى التأكد من التاريخ الصحيح.");
+        return; // يتوقف الكود هنا ولا يحفظ البيانات
+    }
+
+    // 4. إذا كان التاريخ صحيحاً، نكمل عملية الحفظ
     const currentUser = JSON.parse(localStorage.getItem('currentUser'));
     const newChild = {
         id: Date.now(),
@@ -90,13 +106,21 @@ function saveNewChild() {
         birthDate: birthDateValue,
         bookingStatus: "لا يوجد حجز نشط",
         bookingLocation: "",
-        bookingEntryDate: "", // سيتم تعبئته عند الحجز
+        bookingEntryDate: "",
         vaccinations: [
             { name: "عند الولادة", status: "تم أخذها", date: birthDateValue },
             { name: "شهرين", status: "قادم", date: "معلق" },
             { name: "4 أشهر", status: "قادم", date: "معلق" }
         ]
     };
+
+    let children = JSON.parse(localStorage.getItem('children')) || [];
+    children.push(newChild);
+    localStorage.setItem('children', JSON.stringify(children));
+    
+    alert("تم تسجيل الطفل بنجاح! 🌸");
+    location.reload();
+}
 
     let children = JSON.parse(localStorage.getItem('children')) || [];
     children.push(newChild);
