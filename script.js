@@ -9,7 +9,7 @@ const centersData = {
 };
 
 // ==========================================
-// 2. نظام الحماية والخصوصية (العين والدخول)
+// 2. نظام الحماية (العين والدخول)
 // ==========================================
 function togglePass(inputId, iconId) {
     const input = document.getElementById(inputId);
@@ -67,11 +67,6 @@ function loginUser() {
     }
 }
 
-function logoutUser() {
-    localStorage.removeItem('currentUser');
-    window.location.href = 'index.html';
-}
-
 function checkAuth() {
     const user = localStorage.getItem('currentUser');
     if (!user && (window.location.pathname.includes('dashboard.html') || window.location.pathname.includes('booking.html'))) {
@@ -80,15 +75,12 @@ function checkAuth() {
 }
 
 // ==========================================
-// 3. إدارة بيانات الأطفال (مع الطباعة الرسمية)
+// 3. إدارة بيانات الأطفال (مع الطباعة والتاريخ)
 // ==========================================
 function saveNewChild() {
     const name = document.getElementById('newChildName').value.trim();
     const birthDateValue = document.getElementById('birthDate').value;
-    const today = new Date().toISOString().split('T')[0];
-
     if (!name || !birthDateValue) { alert("أكملي البيانات!"); return; }
-    if (birthDateValue > today) { alert("خطأ في التاريخ!"); return; }
 
     const currentUser = JSON.parse(localStorage.getItem('currentUser'));
     const newChild = {
@@ -97,6 +89,8 @@ function saveNewChild() {
         parentEmail: currentUser.email,
         birthDate: birthDateValue,
         bookingStatus: "لا يوجد حجز نشط",
+        bookingLocation: "",
+        bookingEntryDate: "", // سيتم تعبئته عند الحجز
         vaccinations: [
             { name: "عند الولادة", status: "تم أخذها", date: birthDateValue },
             { name: "شهرين", status: "قادم", date: "معلق" },
@@ -119,30 +113,35 @@ function displayChildren() {
     const allChildren = JSON.parse(localStorage.getItem('children')) || [];
     const userChildren = allChildren.filter(child => child.parentEmail === currentUser.email);
     
-    container.innerHTML = userChildren.length ? '' : '<p style="text-align:center; padding:20px;">لا يوجد أطفال مسجلين حالياً.</p>';
+    container.innerHTML = userChildren.length ? '' : '<p style="text-align:center; padding:20px;">لا يوجد أطفال مسجلين.</p>';
     
     userChildren.forEach(child => {
         const card = document.createElement('div');
         card.className = 'child-card';
         
-        // بناء جدول التطعيمات للكتيب
         let vRows = '';
         child.vaccinations.forEach(v => {
             vRows += `<tr><td>${v.name}</td><td>${v.date}</td><td><span class="${v.status === 'تم أخذها' ? 'status-done' : 'status-upcoming'}">${v.status}</span></td></tr>`;
         });
 
+        const bookingInfo = child.bookingEntryDate ? 
+            `<div style="background:#f0f9ff; padding:10px; border-radius:8px; margin:10px 0; border-right:4px solid #10b981;">
+                <p style="margin:0; font-weight:bold;">📍 ${child.bookingLocation}</p>
+                <p style="margin:0; font-size:0.85rem; color:#64748b;">📅 تاريخ الحجز: ${child.bookingEntryDate}</p>
+            </div>` : '';
+
         card.innerHTML = `
-            <div class="print-header-official" style="text-align:center; border-bottom:2px solid #333; margin-bottom:15px; padding-bottom:10px;">
+            <div class="print-header-official" style="display:none; text-align:center; border-bottom:2px solid #333; margin-bottom:15px; padding-bottom:10px;">
                 <h2 style="margin:0;">دولة ليبيا - وزارة الصحة</h2>
-                <h3 style="margin:5px 0;">كتيب التطعيمات الإلكتروني</h3>
-                <small>رقم السجل: ${child.id}</small>
+                <h3 style="margin:5px 0;">كتيب التطعيمات الإلكتروني الرسمي</h3>
+                <p>تاريخ الاستخراج: ${new Date().toLocaleDateString('ar-LY')}</p>
             </div>
 
-            <h3><i class="fa-solid fa-baby"></i> الطفل: ${child.name}</h3>
-            <p>تاريخ الميلاد: ${child.birthDate}</p>
-            <p style="color: ${child.bookingStatus.includes('محجوز') ? '#10b981' : '#64748b'}; font-weight:bold;">
-                الحالة: ${child.bookingStatus}
-            </p>
+            <h3 style="color:var(--primary);"><i class="fa-solid fa-baby"></i> الطفل: ${child.name}</h3>
+            <p><b>تاريخ الميلاد:</b> ${child.birthDate}</p>
+            <p><b>الحالة:</b> <span style="color:#10b981; font-weight:bold;">${child.bookingStatus}</span></p>
+            
+            ${bookingInfo}
 
             <div class="table-wrapper">
                 <table>
@@ -151,40 +150,36 @@ function displayChildren() {
                 </table>
             </div>
 
-            <div class="no-print" style="margin-top:15px; display:flex; gap:10px;">
-                <button onclick="window.print()" class="btn-small btn-success" style="flex:1;">طباعة الكتيب PDF 🖨️</button>
-                <button onclick="deleteChild(${child.id})" class="btn-small btn-danger">حذف</button>
+            <div class="no-print" style="margin-top:20px; display:flex; gap:10px;">
+                <button onclick="window.print()" class="btn-small" style="background:#10b981; color:white; flex:2; border:none; padding:10px; border-radius:8px; cursor:pointer;">
+                    <i class="fa-solid fa-print"></i> طباعة الكتيب PDF
+                </button>
+                <button onclick="deleteChild(${child.id})" class="btn-small btn-danger" style="flex:1;">حذف</button>
             </div>
         `;
         container.appendChild(card);
     });
 }
 
-function deleteChild(id) {
-    if (confirm("هل أنت متأكدة من حذف السجل؟")) {
-        let children = JSON.parse(localStorage.getItem('children')) || [];
-        localStorage.setItem('children', JSON.stringify(children.filter(c => c.id !== id)));
-        location.reload();
-    }
-}
-
 // ==========================================
-// 4. نظام الحجز (الجدول الديناميكي والإيميل)
+// 4. نظام الحجز (التاريخ والجدول التلقائي)
 // ==========================================
 function confirmBooking() {
     const childId = document.getElementById('childSelect')?.value;
     const center = document.getElementById('centerSelect')?.value;
     const selectedVac = document.querySelector('input[name="selectedVaccine"]:checked')?.value;
 
-    if (!childId || !center || !selectedVac) { alert("اختاري الطفل والمركز والتطعيمة!"); return; }
+    if (!childId || !center || !selectedVac) { alert("أكملي خيارات الحجز!"); return; }
 
     let children = JSON.parse(localStorage.getItem('children')) || [];
-    const childIndex = children.findIndex(c => c.id == childId);
+    const idx = children.findIndex(c => c.id == childId);
 
-    if (childIndex !== -1) {
+    if (idx !== -1) {
         const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        const bookingDate = new Date().toLocaleDateString('ar-LY'); // تاريخ الحجز اليوم
+
         const templateParams = {
-            child_name: children[childIndex].name,
+            child_name: children[idx].name,
             parent_email: currentUser.email,
             phone_number: currentUser.phone,
             center_name: center,
@@ -193,13 +188,17 @@ function confirmBooking() {
 
         emailjs.send("service_b8wk5cq", "template_qrm8pcn", templateParams)
             .then(() => {
-                children[childIndex].bookingStatus = `محجوز لـ (${selectedVac}) في: ${center}`;
+                children[idx].bookingStatus = `محجوز لـ (${selectedVac})`;
+                children[idx].bookingLocation = center;
+                children[idx].bookingEntryDate = bookingDate;
                 localStorage.setItem('children', JSON.stringify(children));
-                alert("تم الحجز! ستصلك رسالة تأكيد على الإيميل.");
+                alert("تم الحجز بنجاح!");
                 window.location.href = 'dashboard.html';
             })
             .catch(() => {
-                children[childIndex].bookingStatus = `محجوز لـ (${selectedVac}) في: ${center}`;
+                children[idx].bookingStatus = `محجوز لـ (${selectedVac})`;
+                children[idx].bookingLocation = center;
+                children[idx].bookingEntryDate = bookingDate;
                 localStorage.setItem('children', JSON.stringify(children));
                 window.location.href = 'dashboard.html';
             });
@@ -207,29 +206,27 @@ function confirmBooking() {
 }
 
 // ==========================================
-// 5. تهيئة الصفحات ومراقب الأحداث
+// 5. تهيئة الصفحات
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
     checkAuth();
     if (document.getElementById('childrenCardsContainer')) displayChildren();
     
-    // إعداد القوائم المنسدلة
-    const cSelect = document.getElementById('childSelect');
-    const cntSelect = document.getElementById('centerSelect');
+    const childSelect = document.getElementById('childSelect');
+    const centerSelect = document.getElementById('centerSelect');
 
-    if(cSelect) {
+    if(childSelect) {
         const user = JSON.parse(localStorage.getItem('currentUser'));
         const kids = (JSON.parse(localStorage.getItem('children')) || []).filter(c => c.parentEmail === user.email);
-        cSelect.innerHTML = '<option value="" disabled selected>-- اختاري الطفل --</option>';
-        kids.forEach(k => cSelect.innerHTML += `<option value="${k.id}">${k.name}</option>`);
+        childSelect.innerHTML = '<option value="" disabled selected>-- اختاري الطفل --</option>';
+        kids.forEach(k => childSelect.innerHTML += `<option value="${k.id}">${k.name}</option>`);
     }
 
-    if(cntSelect) {
-        cntSelect.innerHTML = '<option value="" disabled selected>-- اختاري المركز --</option>';
-        Object.keys(centersData).forEach(c => cntSelect.innerHTML += `<option value="${c}">${c}</option>`);
+    if(centerSelect) {
+        centerSelect.innerHTML = '<option value="" disabled selected>-- اختاري المركز --</option>';
+        Object.keys(centersData).forEach(c => centerSelect.innerHTML += `<option value="${c}">${c}</option>`);
         
-        // مراقب اختيار المركز لإظهار الجدول فوراً
-        cntSelect.addEventListener('change', function() {
+        centerSelect.addEventListener('change', function() {
             const vaccines = centersData[this.value];
             const bookingOptions = document.getElementById('bookingOptions');
             if (vaccines && bookingOptions) {
@@ -244,3 +241,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+function deleteChild(id) {
+    if (confirm("هل أنت متأكدة؟")) {
+        let children = JSON.parse(localStorage.getItem('children')) || [];
+        localStorage.setItem('children', JSON.stringify(children.filter(c => c.id !== id)));
+        location.reload();
+    }
+}
