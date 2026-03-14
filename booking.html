@@ -4,59 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>حجز موعد - منظومة التطعيمات</title>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 
-<script type="text/javascript">
-   (function(){
-      emailjs.init("2_TFOcCDFXnHCoW05"); 
-   })();
-</script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script type="text/javascript">
+       (function(){
+          emailjs.init("2_TFOcCDFXnHCoW05"); // تأكدي أن هذا هو مفتاحك الصحيح
+       })();
+    </script>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
+    
     <style>
-        .container {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-        }
-
-        .card {
-            max-width: 550px !important;
-            margin: 20px auto !important;
-            padding: 30px !important;
-        }
-
-        .booking-step {
-            background: #f8fafc;
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 15px;
-            border: 1px solid #e2e8f0;
-            min-height: 100px; /* ضمان مساحة كافية للجدول */
-        }
-
-        @media screen and (max-width: 768px) {
-            .card { max-width: 95% !important; }
-        }
-
-        select, input[type="date"], input[type="text"] {
-            width: 100% !important; 
-            height: 50px !important;
-            font-size: 16px !important; 
-            padding: 10px !important;
-            display: block;
-            margin-bottom: 10px;
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
-        }
+        /* تنسيقات إضافية خاصة بصفحة الحجز لضمان الجمالية */
+        .container { flex: 1; display: flex; justify-content: center; align-items: flex-start; padding: 20px; }
+        .card { max-width: 600px !important; width: 100%; margin: 20px auto; padding: 30px; background: #fff; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        .booking-step { background: #f1f5f9; padding: 20px; border-radius: 15px; margin-top: 20px; border: 1px dashed #cbd5e1; min-height: 120px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: var(--dark-bg); }
+        select { width: 100%; padding: 12px; border-radius: 10px; border: 1.5px solid #e2e8f0; font-family: 'Cairo', sans-serif; font-size: 1rem; }
+        .logout-btn { background: var(--danger); color: white !important; border-radius: 50px !important; padding: 8px 15px !important; font-size: 0.8rem !important; }
     </style>
 </head>
 <body>
     <div class="top-header">
         <h1>منظومة التطعيمات <i class="fa-solid fa-shield-halved"></i></h1>
-        <p>نهتم بمستقبل أطفالكم من خلال توفير رعاية صحية ذكية وسهولة الوصول.</p>
+        <p>حجز المواعيد الإلكتروني - رعاية صحية ذكية لأطفالنا.</p>
     </div>
 
     <nav>
@@ -64,48 +37,50 @@
         <a href="booking.html" class="active"><i class="fa-solid fa-calendar-check"></i> حجز موعد</a>
         <a href="dashboard.html"><i class="fa-solid fa-book-medical"></i> الكتيب الإلكتروني</a>
         <a href="contact.html"><i class="fa-solid fa-envelope"></i> تواصل معنا</a>
+        <a href="#" onclick="logout()" class="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> خروج</a>
     </nav>
 
     <div class="container">
         <div class="card">
-            <h2 style="margin-bottom: 10px;">حجز موعد تطعيم <i class="fa-solid fa-calendar-plus"></i></h2>
-            <p style="color: #64748b; margin-bottom: 25px;">يرجى ملء البيانات التالية بدقة لتأكيد الموعد.</p>
+            <div style="text-align: center; margin-bottom: 25px;">
+                <i class="fa-solid fa-calendar-plus" style="font-size: 3rem; color: var(--primary); margin-bottom: 15px;"></i>
+                <h2>حجز موعد تطعيم جديد</h2>
+                <p style="color: #64748b;">اختاري الطفل والمركز لعرض المواعيد المتاحة</p>
+            </div>
 
             <form id="bookingForm" onsubmit="event.preventDefault();">
                 <div class="form-group">
-                    <label style="display:block; text-align:right; margin-bottom:8px; font-weight:bold;">اختيار الطفل:</label>
+                    <label><i class="fa-solid fa-child"></i> اختيار الطفل:</label>
                     <select id="childSelect" required>
-                        <option value="" disabled selected>-- اختر الطفل --</option>
+                        <option value="" disabled selected>-- جاري تحميل أطفالك.. --</option>
                     </select>
                 </div>
 
                 <div class="form-group">
-                    <label style="display:block; text-align:right; margin-bottom:8px; font-weight:bold;">المركز الصحي:</label>
+                    <label><i class="fa-solid fa-hospital"></i> المركز الصحي:</label>
                     <select id="centerSelect" required>
                         <option value="" disabled selected>-- اختر المركز القريب منك --</option>
                         <option value="مركز بنغازي الطبي">مركز بنغازي الطبي</option>
+                        <option value="مركز الفويهات الصحي">مركز الفويهات الصحي</option>
                         <option value="مركز سيدي يونس الصحي">مركز سيدي يونس الصحي</option>
                         <option value="مستشفى الأطفال">مستشفى الأطفال</option>
                     </select>
                 </div>
 
-                <div class="booking-step">
+                <div class="booking-step" id="bookingOptions">
                     <p id="placeholderText" style="text-align: center; color: #94a3b8; padding-top: 20px;">
-                        يرجى اختيار المركز لعرض التطعيمات والمواعيد المتاحة هنا..
+                        <i class="fa-solid fa-circle-info"></i> يرجى اختيار المركز لعرض التطعيمات المتوفرة..
                     </p>
                 </div>
-
-                </form>
+            </form>
         </div>
     </div>
 
     <footer>
         <p>جميع الحقوق محفوظة &copy; 2026 - منظومة صغارنا للتطعيمات</p>
-        <p>بنغازي - ليبيا | حماية أطفالنا مسؤوليتنا <i class="fa-solid fa-heart" style="color:#ef4444;"></i></p>
+        <p>بنغازي - ليبيا | رعاية متكاملة لطفلك <i class="fa-solid fa-heart" style="color:#ef4444;"></i></p>
     </footer>
 
     <script src="script.js"></script>
 </body>
 </html>
-
-
