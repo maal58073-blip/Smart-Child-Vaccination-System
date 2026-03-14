@@ -1,4 +1,6 @@
-// --- 1. قاعدة البيانات ---
+// ==========================================
+// 1. قاعدة البيانات (المراكز الصحية)
+// ==========================================
 const centersData = {
     "مركز الفويهات الصحي": [{ name: "شلل الأطفال", count: 120, date: "2026-03-15" }, { name: "الخماسي", count: 35, date: "2026-03-18" }],
     "مركز بنغازي الطبي": [{ name: "شلل الأطفال", count: 200, date: "2026-03-20" }, { name: "الحصبة", count: 90, date: "2026-04-05" }],
@@ -6,7 +8,9 @@ const centersData = {
     "مستشفى الأطفال": [{ name: "الحصبة", count: 100, date: "2026-04-05" }]
 };
 
-// --- 2. نظام تسجيل الدخول (طلب الأستاذة) ---
+// ==========================================
+// 2. نظام تسجيل الدخول والمستخدمين
+// ==========================================
 function showAuth(type) {
     document.getElementById('loginForm').style.display = type === 'login' ? 'block' : 'none';
     document.getElementById('registerForm').style.display = type === 'register' ? 'block' : 'none';
@@ -15,57 +19,82 @@ function showAuth(type) {
 }
 
 function registerUser() {
-    const name = document.getElementById('regName').value;
-    const email = document.getElementById('regEmail').value;
-    const phone = document.getElementById('regPhone').value;
+    const name = document.getElementById('regName').value.trim();
+    const email = document.getElementById('regEmail').value.trim();
+    const phone = document.getElementById('regPhone').value.trim();
     const pass = document.getElementById('regPass').value;
 
-    if (!name || !email || !pass) { alert("يرجى ملء البيانات!"); return; }
+    if (!name || !email || !pass || !phone) { 
+        alert("يرجى ملء كافة البيانات!"); 
+        return; 
+    }
 
-    const user = { name, email, phone, pass };
-    localStorage.setItem('currentUser', JSON.stringify(user));
+    let users = JSON.parse(localStorage.getItem('users')) || [];
+    
+    // التحقق من عدم تكرار الإيميل
+    if (users.some(u => u.email === email)) {
+        alert("هذا البريد الإلكتروني مسجل مسبقاً!");
+        return;
+    }
+
+    const newUser = { name, email, phone, pass };
+    users.push(newUser);
+    localStorage.setItem('users', JSON.stringify(users));
+    
+    // تسجيل الدخول تلقائياً بعد الحساب الجديد
+    localStorage.setItem('currentUser', JSON.stringify(newUser));
     alert("تم إنشاء حسابك بنجاح يا " + name + "! يمكنك الآن إضافة أطفالك.");
     window.location.href = 'dashboard.html';
 }
 
 function loginUser() {
-    const email = document.getElementById('loginEmail').value;
+    const email = document.getElementById('loginEmail').value.trim();
     const pass = document.getElementById('loginPass').value;
-    const storedUser = JSON.parse(localStorage.getItem('currentUser'));
+    
+    let users = JSON.parse(localStorage.getItem('users')) || [];
+    const validUser = users.find(u => u.email === email && u.pass === pass);
 
-    if (storedUser && storedUser.email === email && storedUser.pass === pass) {
+    if (validUser) {
+        localStorage.setItem('currentUser', JSON.stringify(validUser));
         alert("مرحباً بكِ مجدداً!");
         window.location.href = 'dashboard.html';
     } else {
-        alert("بيانات الدخول غير صحيحة!");
+        alert("بيانات الدخول غير صحيحة، يرجى المحاولة مجدداً!");
     }
 }
 
-// حماية الصفحات: منع الدخول للكتيب بدون تسجيل
+function logoutUser() {
+    localStorage.removeItem('currentUser');
+    window.location.href = 'index.html';
+}
+
 function checkAuth() {
     const user = localStorage.getItem('currentUser');
     const currentPage = window.location.pathname;
+    
+    // منع الدخول لصفحات لوحة التحكم والحجز بدون تسجيل
     if (!user && (currentPage.includes('dashboard.html') || currentPage.includes('booking.html'))) {
         alert("الرجاء تسجيل الدخول أولاً!");
         window.location.href = 'index.html';
     }
 }
 
-// --- 3. إدارة بيانات الأطفال ---
+// ==========================================
+// 3. إدارة بيانات الأطفال (مخصصة لكل أم)
+// ==========================================
 function saveNewChild() {
     const name = document.getElementById('newChildName').value.trim();
     const birthDateValue = document.getElementById('birthDate').value;
     const today = new Date().toISOString().split('T')[0];
 
-    if (!name || !birthDateValue) { alert("أكملي البيانات!"); return; }
-    if (birthDateValue > today) { alert("خطأ: التاريخ في المستقبل!"); return; }
+    if (!name || !birthDateValue) { alert("أكملي البيانات من فضلك!"); return; }
+    if (birthDateValue > today) { alert("خطأ: تاريخ الميلاد لا يمكن أن يكون في المستقبل!"); return; }
 
-    const user = JSON.parse(localStorage.getItem('currentUser'));
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
     const newChild = {
         id: Date.now(),
         name: name,
-        parentEmail: user.email, // ربط تلقائي بإيميل الأم
-        parentPhone: user.phone, // ربط تلقائي برقم الأم
+        parentEmail: currentUser.email, // مهم جداً: ربط الطفل بأمه فقط
         birthDate: birthDateValue,
         bookingStatus: "لا يوجد حجز نشط",
         vaccinations: [
@@ -82,53 +111,106 @@ function saveNewChild() {
     location.reload();
 }
 
-// --- 4. نظام الحجز وإرسال الإيميل ---
+function displayChildren() {
+    const container = document.getElementById('childrenCardsContainer');
+    if (!container) return;
+    
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    const allChildren = JSON.parse(localStorage.getItem('children')) || [];
+    
+    // فلترة الأطفال لعرض أطفال الأم الحالية فقط
+    const userChildren = allChildren.filter(child => child.parentEmail === currentUser.email);
+    
+    container.innerHTML = userChildren.length ? '' : '<p>لا يوجد أطفال مسجلين حالياً، أضيفي طفلك الآن.</p>';
+    
+    userChildren.forEach(child => {
+        const card = document.createElement('div');
+        card.className = 'child-card';
+        card.innerHTML = `
+            <h3>الطفل: ${child.name}</h3>
+            <p>تاريخ الميلاد: ${child.birthDate}</p>
+            <p style="color: ${child.bookingStatus.includes('محجوز') ? 'green' : 'gray'};">
+                حالة الحجز: ${child.bookingStatus}
+            </p>
+            <button onclick="deleteChild(${child.id})" class="btn-small btn-danger">حذف السجل</button>
+        `;
+        container.appendChild(card);
+    });
+}
+
+function deleteChild(id) {
+    if (confirm("هل أنت متأكدة من حذف سجل هذا الطفل؟")) {
+        let children = JSON.parse(localStorage.getItem('children')) || [];
+        // الاحتفاظ بكل الأطفال ما عدا المحذوف
+        children = children.filter(c => c.id !== id);
+        localStorage.setItem('children', JSON.stringify(children));
+        location.reload();
+    }
+}
+
+// ==========================================
+// 4. نظام الحجز وإرسال الإيميل
+// ==========================================
 function confirmBooking() {
     const childId = document.getElementById('childSelect')?.value;
     const center = document.getElementById('centerSelect')?.value;
     const selectedVac = document.querySelector('input[name="selectedVaccine"]:checked')?.value;
 
-    if (!childId || !center || !selectedVac) { alert("اختاري الطفل والمركز والتطعيمة!"); return; }
+    if (!childId || !center || !selectedVac) { 
+        alert("يرجى اختيار الطفل، المركز، ونوع التطعيمة!"); 
+        return; 
+    }
 
     let children = JSON.parse(localStorage.getItem('children')) || [];
     const childIndex = children.findIndex(c => c.id == childId);
 
     if (childIndex !== -1) {
-        const user = JSON.parse(localStorage.getItem('currentUser'));
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        
+        // تجهيز بيانات الإيميل
         const templateParams = {
             child_name: children[childIndex].name,
-            parent_email: user.email,
-            phone_number: user.phone,
+            parent_email: currentUser.email,
+            phone_number: currentUser.phone,
             center_name: center,
             vaccine: selectedVac
         };
 
+        // إرسال الإيميل (تأكدي من إضافة مكتبة emailjs في الـ HTML)
         emailjs.send("service_b8wk5cq", "template_qrm8pcn", templateParams)
             .then(() => {
+                // تحديث حالة الحجز للطفل
                 children[childIndex].bookingStatus = `محجوز لـ (${selectedVac}) في: ${center}`;
                 localStorage.setItem('children', JSON.stringify(children));
-                alert("تم الحجز! ستصلك رسالة تأكيد على إيميلك: " + user.email);
+                alert("تم الحجز بنجاح! ستصلك رسالة تأكيد على إيميلك: " + currentUser.email);
                 window.location.href = 'dashboard.html';
-            }, (err) => {
-                alert("تم الحجز محلياً، فشل الإرسال للإيميل.");
+            })
+            .catch((err) => {
+                console.error("خطأ في الإيميل:", err);
+                alert("حدث خطأ أثناء إرسال الإيميل، لكن تم الحجز في النظام محلياً.");
+                // تحديث الحالة حتى لو فشل الإيميل
+                children[childIndex].bookingStatus = `محجوز لـ (${selectedVac}) في: ${center}`;
+                localStorage.setItem('children', JSON.stringify(children));
+                window.location.href = 'dashboard.html';
             });
     }
 }
 
-// --- 5. تهيئة الصفحات ---
-document.addEventListener('DOMContentLoaded', () => {
-    checkAuth();
-    if (document.getElementById('childrenCardsContainer')) displayChildren();
-    if (document.getElementById('childSelect')) populateChildSelect();
-});
-
-// باقي الدوال (displayChildren, deleteChild, populateChildSelect, markAsDone) تبقى كما هي
+// ==========================================
+// 5. تهيئة القوائم المنسدلة (Dropdowns)
+// ==========================================
 function populateChildSelect() {
     const select = document.getElementById('childSelect');
     if(!select) return;
-    const children = JSON.parse(localStorage.getItem('children')) || [];
-    select.innerHTML = '<option value="" disabled selected>-- اختر الطفل --</option>';
-    children.forEach(c => {
+    
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    const allChildren = JSON.parse(localStorage.getItem('children')) || [];
+    
+    // الأم تختار من أطفالها فقط
+    const userChildren = allChildren.filter(c => c.parentEmail === currentUser.email);
+    
+    select.innerHTML = '<option value="" disabled selected>-- اختاري الطفل --</option>';
+    userChildren.forEach(c => {
         const opt = document.createElement('option');
         opt.value = c.id;
         opt.textContent = c.name;
@@ -136,23 +218,32 @@ function populateChildSelect() {
     });
 }
 
-function displayChildren() {
-    const container = document.getElementById('childrenCardsContainer');
-    if (!container) return;
-    const children = JSON.parse(localStorage.getItem('children')) || [];
-    container.innerHTML = children.length ? '' : '<p>لا يوجد أطفال مسجلين حالياً.</p>';
-    children.forEach(child => {
-        const card = document.createElement('div');
-        card.className = 'child-card';
-        card.innerHTML = `<h3>الطفل: ${child.name}</h3><p>تاريخ الميلاد: ${child.birthDate}</p><p style="color:green;">${child.bookingStatus}</p><button onclick="deleteChild(${child.id})" class="btn-small btn-danger">حذف</button>`;
-        container.appendChild(card);
+function populateCenterSelect() {
+    const select = document.getElementById('centerSelect');
+    if(!select) return;
+
+    select.innerHTML = '<option value="" disabled selected>-- اختاري المركز الصحي --</option>';
+    // جلب أسماء المراكز من قاعدة البيانات الديناميكية
+    Object.keys(centersData).forEach(centerName => {
+        const opt = document.createElement('option');
+        opt.value = centerName;
+        opt.textContent = centerName;
+        select.appendChild(opt);
     });
 }
 
-function deleteChild(id) {
-    if (confirm("حذف السجل؟")) {
-        let children = JSON.parse(localStorage.getItem('children')) || [];
-        localStorage.setItem('children', JSON.stringify(children.filter(c => c.id !== id)));
-        location.reload();
+// ==========================================
+// 6. تشغيل الدوال عند تحميل الصفحة
+// ==========================================
+document.addEventListener('DOMContentLoaded', () => {
+    checkAuth();
+    
+    if (document.getElementById('childrenCardsContainer')) {
+        displayChildren();
     }
-}
+    
+    if (document.getElementById('childSelect')) {
+        populateChildSelect();
+        populateCenterSelect(); // جلب المراكز من centersData
+    }
+});
