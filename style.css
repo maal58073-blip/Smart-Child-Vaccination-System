@@ -29,18 +29,36 @@ body {
     flex-direction: column; 
 }
 
-/* --- إضافات نظام تسجيل الدخول  --- */
+/* --- إضافات نظام تسجيل الدخول (العين) --- */
 .auth-box {
     background: #ffffff;
     padding: 25px;
     border-radius: 20px;
     margin: 20px auto;
-    width: 100%;
+    width: 90%;
     max-width: 450px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
     border: 1px solid #e2e8f0;
     text-align: center;
 }
+
+/* لتنسيق أيقونة العين داخل الحقل */
+.pass-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.pass-wrapper i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: var(--text-main);
+    transition: 0.3s;
+}
+
+.pass-wrapper i:hover { color: var(--primary); }
 
 .auth-tabs {
     display: flex;
@@ -86,14 +104,6 @@ body {
     box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
 }
 
-.hero-img {
-    width: 100%;
-    max-width: 600px;
-    border-radius: 20px;
-    margin-top: 25px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-}
-
 /* الرأس والتنقل */
 .top-header { background-color: var(--dark-bg); color: white; padding: 30px 20px; text-align: center; }
 .top-header h1 { font-size: 2rem; color: #a5b4fc; margin-bottom: 10px; }
@@ -134,14 +144,6 @@ nav a:hover, nav a.active { background: #e0e7ff; color: var(--primary); }
     width: 100%; 
 }
 
-.children-container {
-    width: 100%;
-    max-width: 900px;
-    display: flex;
-    flex-direction: column;
-    gap: 25px;
-}
-
 .child-card { 
     background: #ffffff; 
     border: 1px solid #e2e8f0; 
@@ -149,80 +151,83 @@ nav a:hover, nav a.active { background: #e0e7ff; color: var(--primary); }
     border-radius: 20px; 
     box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
     width: 100%;
+    max-width: 800px;
+    margin-bottom: 25px;
 }
 
-/* جداول مرنة للجوال */
+/* حالة الحجز في الكتيب */
+.booking-badge {
+    background: #f0fdf4;
+    border-right: 4px solid var(--success);
+    padding: 12px;
+    border-radius: 8px;
+    margin: 15px 0;
+}
+
+/* الجداول */
 .table-wrapper {
     width: 100%;
     overflow-x: auto; 
     margin: 15px 0;
-    border: 1px solid #f1f5f9;
     border-radius: 12px;
+    border: 1px solid #f1f5f9;
 }
 
-table { 
-    width: 100%; 
-    border-collapse: collapse; 
-    min-width: 450px; 
-}
-
-th, td { padding: 12px; border-bottom: 1px solid #f1f5f9; text-align: center; font-size: 0.95rem; }
-th { background-color: var(--primary); color: white; font-weight: 700; }
+table { width: 100%; border-collapse: collapse; min-width: 400px; }
+th, td { padding: 12px; border-bottom: 1px solid #f1f5f9; text-align: center; }
+th { background-color: #f8fafc; color: var(--dark-bg); font-weight: 800; border-bottom: 2px solid #e2e8f0; }
 
 .status-done { background: #dcfce7; color: #16a34a; padding: 4px 12px; border-radius: 20px; font-weight: bold; font-size: 0.85rem; }
-.status-upcoming { background: #fef3c7; color: #92400e; padding: 4px 12px; border-radius: 20px; font-weight: bold; font-size: 0.85rem; }
+.status-upcoming { background: #f1f5f9; color: #64748b; padding: 4px 12px; border-radius: 20px; font-weight: bold; font-size: 0.85rem; }
 
-.btn { background: var(--primary); color: white; padding: 14px 25px; border-radius: 12px; font-weight: 700; border: none; cursor: pointer; transition: 0.2s; }
-.btn-small { padding: 10px 15px; font-size: 0.9rem; cursor: pointer; border-radius: 8px; border: none; }
-.btn-danger { background: var(--danger); color: white; }
+/* الأزرار */
+.btn { background: var(--primary); color: white; padding: 14px 25px; border-radius: 12px; font-weight: 700; border: none; cursor: pointer; transition: 0.3s; width: 100%; }
+.btn:hover { background: var(--primary-hover); transform: translateY(-2px); }
+.btn-small { padding: 10px 15px; font-size: 0.9rem; cursor: pointer; border-radius: 8px; border: none; font-weight: bold; transition: 0.2s; }
+.btn-danger { background: #fee2e2; color: var(--danger); }
+.btn-danger:hover { background: var(--danger); color: white; }
 .btn-success { background: var(--success); color: white; }
 
 footer { background: var(--dark-bg); color: #94a3b8; padding: 30px; text-align: center; margin-top: auto; }
 
-/* إعدادات الطباعة الرسمية */
+/* --- إعدادات الطباعة الرسمية --- */
 @media print {
-    nav, footer, .top-header, .add-child-section, .no-print, button, .btn, .auth-box { 
+    nav, footer, .top-header, .add-child-section, .no-print, button, .btn, .auth-tabs, .auth-box { 
         display: none !important; 
     }
 
-    body, .container, .children-container {
-        display: block !important;
-        width: 100% !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        background: white !important;
-    }
+    body { background: white !important; }
+    
+    .container { padding: 0 !important; }
 
     .child-card { 
         display: block !important;
         width: 100% !important;
-        page-break-after: always !important; 
-        break-after: page !important;        
-        page-break-inside: avoid !important; 
-        border: 2px solid #333 !important; 
-        margin: 0 0 40px 0 !important;
-        padding: 30px !important;
-        border-radius: 0 !important;
+        border: 1px solid #000 !important; 
         box-shadow: none !important;
+        page-break-after: always;
+        margin: 0 !important;
+        padding: 40px !important;
     }
 
-    table { border: 1px solid #000 !important; width: 100% !important; }
-    th { background: #f0f0f0 !important; color: black !important; border: 1px solid #000 !important; }
-    td { border: 1px solid #000 !important; color: black !important; }
+    .print-header-official {
+        display: block !important;
+        text-align: center;
+        margin-bottom: 30px;
+        border-bottom: 2px solid #000;
+        padding-bottom: 15px;
+    }
+
+    table { border: 1px solid #000 !important; }
+    th { background: #eee !important; color: #000 !important; border: 1px solid #000 !important; }
+    td { border: 1px solid #000 !important; }
 }
 
-.print-header-official {
-    display: none;
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-@media print {
-    .print-header-official { display: block !important; }
-}
+.print-header-official { display: none; }
 
 /* تحسينات الجوال */
 @media screen and (max-width: 768px) {
+    .container { padding: 20px 15px; }
     .top-header h1 { font-size: 1.5rem; }
-    nav a { padding: 8px 12px; font-size: 0.85rem; }
+    nav a { padding: 8px 12px; font-size: 0.8rem; }
 }
