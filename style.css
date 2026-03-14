@@ -29,6 +29,71 @@ body {
     flex-direction: column; 
 }
 
+/* --- إضافات نظام تسجيل الدخول (طلب الأستاذة) --- */
+.auth-box {
+    background: #ffffff;
+    padding: 25px;
+    border-radius: 20px;
+    margin: 20px auto;
+    width: 100%;
+    max-width: 450px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
+    text-align: center;
+}
+
+.auth-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 25px;
+    background: #f1f5f9;
+    padding: 5px;
+    border-radius: 12px;
+}
+
+.btn-tab {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    background: transparent;
+    color: var(--text-main);
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 700;
+    transition: 0.3s;
+}
+
+.btn-tab.active {
+    background: white;
+    color: var(--primary);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.input-style {
+    width: 100%;
+    padding: 12px 15px;
+    margin-bottom: 12px;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    background: #fdfdfd;
+    font-size: 0.95rem;
+    transition: 0.3s;
+}
+
+.input-style:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.hero-img {
+    width: 100%;
+    max-width: 600px;
+    border-radius: 20px;
+    margin-top: 25px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
 /* الرأس والتنقل */
 .top-header { background-color: var(--dark-bg); color: white; padding: 30px 20px; text-align: center; }
 .top-header h1 { font-size: 2rem; color: #a5b4fc; margin-bottom: 10px; }
@@ -109,19 +174,17 @@ th { background-color: var(--primary); color: white; font-weight: 700; }
 
 .btn { background: var(--primary); color: white; padding: 14px 25px; border-radius: 12px; font-weight: 700; border: none; cursor: pointer; transition: 0.2s; }
 .btn-small { padding: 10px 15px; font-size: 0.9rem; cursor: pointer; border-radius: 8px; border: none; }
+.btn-danger { background: var(--danger); color: white; }
+.btn-success { background: var(--success); color: white; }
 
 footer { background: var(--dark-bg); color: #94a3b8; padding: 30px; text-align: center; margin-top: auto; }
 
-/* ========================================= */
-/* --- إعدادات الطباعة الرسمية (التعديل هنا) --- */
-/* ========================================= */
+/* إعدادات الطباعة الرسمية */
 @media print {
-    /* 1. إخفاء كل العناصر المزعجة في الطباعة */
-    nav, footer, .top-header, .add-child-section, .no-print, button, .btn { 
+    nav, footer, .top-header, .add-child-section, .no-print, button, .btn, .auth-box { 
         display: none !important; 
     }
 
-    /* 2. تحويل الجسم والحاويات إلى Block (إجباري لفصل الصفحات) */
     body, .container, .children-container {
         display: block !important;
         width: 100% !important;
@@ -130,47 +193,32 @@ footer { background: var(--dark-bg); color: #94a3b8; padding: 30px; text-align: 
         background: white !important;
     }
 
-    /* 3. إجبار كل كرت طفل على أن يبدأ في صفحة جديدة تماماً */
     .child-card { 
         display: block !important;
         width: 100% !important;
-        page-break-after: always !important; /* للمتصفحات القديمة */
-        break-after: page !important;        /* للمتصفحات الحديثة */
-        page-break-inside: avoid !important; /* لمنع انقسام الكرت الواحد */
-        
-        border: 2px solid #333 !important; /* حدود واضحة في الطباعة */
+        page-break-after: always !important; 
+        break-after: page !important;        
+        page-break-inside: avoid !important; 
+        border: 2px solid #333 !important; 
         margin: 0 0 40px 0 !important;
         padding: 30px !important;
         border-radius: 0 !important;
         box-shadow: none !important;
     }
 
-    /* 4. تحسين الجداول للورق */
     table { border: 1px solid #000 !important; width: 100% !important; }
     th { background: #f0f0f0 !important; color: black !important; border: 1px solid #000 !important; }
     td { border: 1px solid #000 !important; color: black !important; }
 }
 
-/* إخفاء ترويسة الطباعة من المتصفح */
 .print-header-official {
     display: none;
     text-align: center;
     margin-bottom: 20px;
 }
 
-.print-header-official h2 { font-size: 1.5rem; margin-bottom: 5px; }
-.print-header-official h3 { font-size: 1.2rem; margin-bottom: 5px; }
-
-/* إظهار الترويسة عند الطباعة فقط */
 @media print {
-    .print-header-official {
-        display: block !important;
-    }
-    
-    /* إخفاء العنوان الثابت الأصلي الذي كان في أعلى الصفحة */
-    header, .main-title {
-        display: none !important;
-    }
+    .print-header-official { display: block !important; }
 }
 
 /* تحسينات الجوال */
