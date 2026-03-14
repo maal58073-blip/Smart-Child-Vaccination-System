@@ -106,7 +106,7 @@
                 return;
             }
 
-            const pass = prompt("أدخلي كلمة مرور المشرف (admin2026):");
+            const pass = prompt("أدخلي كلمة مرور المشرف");
             if (pass === "admin2026") {
                 sessionStorage.setItem('adminLoggedIn', 'true');
                 document.getElementById('adminContent').style.display = 'block';
