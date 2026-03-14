@@ -46,27 +46,32 @@
     <div class="card">
         <h2 class="welcome-title">مرحباً بكِ في منظومة صغارنا <i class="fa-solid fa-syringe"></i></h2>
         <p style="color: #475569; margin-bottom: 20px;">الرجاء تسجيل الدخول للوصول إلى الكتيب الإلكتروني وحجز المواعيد.</p>
+<div class="auth-box">
+    <div class="auth-tabs">
+        <button onclick="showAuth('login')" id="tab-login" class="btn-tab active">تسجيل دخول</button>
+        <button onclick="showAuth('register')" id="tab-register" class="btn-tab">حساب جديد</button>
+    </div>
 
-        <div class="auth-box" style="background: #f8fafc; padding: 20px; border-radius: 15px; margin-bottom: 25px; border: 1px solid #e2e8f0;">
-            <div class="auth-tabs" style="display: flex; gap: 10px; margin-bottom: 20px;">
-                <button onclick="showAuth('login')" id="tab-login" class="btn-tab active">تسجيل دخول</button>
-                <button onclick="showAuth('register')" id="tab-register" class="btn-tab">حساب جديد</button>
-            </div>
-
-            <div id="loginForm">
-                <input type="email" id="loginEmail" placeholder="البريد الإلكتروني" class="input-style" style="width: 90%; padding: 12px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #cbd5e1;">
-                <input type="password" id="loginPass" placeholder="كلمة المرور" class="input-style" style="width: 90%; padding: 12px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #cbd5e1;">
-                <button onclick="loginUser()" class="btn" style="width: 100%;">دخول للمنظومة</button>
-            </div>
-
-            <div id="registerForm" style="display:none;">
-                <input type="text" id="regName" placeholder="اسم الأم بالكامل" class="input-style" style="width: 90%; padding: 12px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #cbd5e1;">
-                <input type="email" id="regEmail" placeholder="البريد الإلكتروني" class="input-style" style="width: 90%; padding: 12px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #cbd5e1;">
-                <input type="tel" id="regPhone" placeholder="رقم الهاتف" class="input-style" style="width: 90%; padding: 12px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #cbd5e1;">
-                <input type="password" id="regPass" placeholder="كلمة مرور" class="input-style" style="width: 90%; padding: 12px; margin-bottom: 10px; border-radius: 8px; border: 1px solid #cbd5e1;">
-                <button onclick="registerUser()" class="btn" style="width: 100%;">إنشاء حساب</button>
-            </div>
+    <div id="loginForm">
+        <input type="email" id="loginEmail" placeholder="البريد الإلكتروني" class="input-style">
+        <div style="position: relative;">
+            <input type="password" id="loginPass" placeholder="كلمة المرور" class="input-style">
+            <i class="fa-solid fa-eye" id="toggleLoginPass" onclick="togglePass('loginPass', 'toggleLoginPass')" style="position: absolute; left: 15px; top: 15px; cursor: pointer; color: #64748b;"></i>
         </div>
+        <button onclick="loginUser()" class="btn" style="width: 100%; margin-top: 10px;">دخول للمنظومة</button>
+    </div>
+
+    <div id="registerForm" style="display:none;">
+        <input type="text" id="regName" placeholder="اسم الأم بالكامل" class="input-style">
+        <input type="email" id="regEmail" placeholder="البريد الإلكتروني" class="input-style">
+        <input type="tel" id="regPhone" placeholder="رقم الهاتف" class="input-style">
+        <div style="position: relative;">
+            <input type="password" id="regPass" placeholder="كلمة مرور" class="input-style">
+            <i class="fa-solid fa-eye" id="toggleRegPass" onclick="togglePass('regPass', 'toggleRegPass')" style="position: absolute; left: 15px; top: 15px; cursor: pointer; color: #64748b;"></i>
+        </div>
+        <button onclick="registerUser()" class="btn" style="width: 100%; margin-top: 10px;">إنشاء الحساب</button>
+    </div>
+</div>
 
         <img src="images/hero.jpg.jpeg" alt="رعاية طبية للأطفال" class="hero-img">
     </div>
