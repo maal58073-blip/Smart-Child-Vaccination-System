@@ -47,11 +47,15 @@ function showAuth(type) {
 
 // تعديل 1: وظيفة استعادة كلمة المرور
 function forgotPassword() {
-    const email = prompt("الرجاء إدخال بريدكِ الإلكتروني المسجل لاستعادة كلمة المرور:");
-    if (!email) return;
+    const emailInput = prompt("الرجاء إدخال بريدكِ الإلكتروني المسجل لاستعادة كلمة المرور:");
+    if (!emailInput) return;
+    
+    // الحل هنا: تحويل الحروف لصغيرة وإزالة المسافات
+    const email = emailInput.trim().toLowerCase(); 
 
     let users = JSON.parse(localStorage.getItem('users')) || [];
-    const userIndex = users.findIndex(u => u.email === email);
+    // مقارنة ذكية تتجاهل حالة الأحرف
+    const userIndex = users.findIndex(u => (u.email || "").toLowerCase() === email);
 
     if (userIndex !== -1) {
         const newPass = prompt("تم العثور على حسابكِ. أدخلي كلمة المرور الجديدة:");
@@ -66,6 +70,7 @@ function forgotPassword() {
         alert("عذراً، هذا البريد غير مسجل في المنظومة.");
     }
 }
+
 
 function registerUser() {
     const name = document.getElementById('regName')?.value.trim();
