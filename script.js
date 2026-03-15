@@ -74,7 +74,7 @@ function forgotPassword() {
 
 function registerUser() {
     const name = document.getElementById('regName')?.value.trim();
-    const email = document.getElementById('regEmail')?.value.trim();
+    const email = document.getElementById('regEmail')?.value.trim().toLowerCase();
     const phone = document.getElementById('regPhone')?.value.trim();
     const pass = document.getElementById('regPass')?.value;
 
