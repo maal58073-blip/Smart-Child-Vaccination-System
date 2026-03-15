@@ -20,13 +20,20 @@ let centersData = JSON.parse(localStorage.getItem('centersData'));
 function togglePass(inputId, iconId) {
     const input = document.getElementById(inputId);
     const icon = document.getElementById(iconId);
+    
     if (input && icon) {
         if (input.type === "password") {
-            input.type = "text";
-            icon.classList.replace("fa-eye", "fa-eye-slash");
+            // تحويل النص إلى مرئي
+            input.type = "text"; 
+            // إزالة العين المغلقة ووضع العين المفتوحة (لأن النص ظاهر الآن)
+            icon.classList.remove("fa-eye-slash");
+            icon.classList.add("fa-eye");
         } else {
-            input.type = "password";
-            icon.classList.replace("fa-eye-slash", "fa-eye");
+            // تحويل النص إلى مخفي
+            input.type = "password"; 
+            // إزالة العين المفتوحة ووضع العين المغلقة (لأن النص مخفي الآن)
+            icon.classList.remove("fa-eye");
+            icon.classList.add("fa-eye-slash");
         }
     }
 }
