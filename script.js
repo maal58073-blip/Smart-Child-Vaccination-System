@@ -92,7 +92,8 @@ function registerUser() {
 }
 
 function loginUser() {
-    const email = document.getElementById('loginEmail')?.value.trim();
+   
+    const email = document.getElementById('loginEmail')?.value.trim().toLowerCase();
     const pass = document.getElementById('loginPass')?.value;
     let users = JSON.parse(localStorage.getItem('users')) || [];
     const validUser = users.find(u => u.email === email && u.pass === pass);
