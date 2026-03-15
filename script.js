@@ -194,12 +194,16 @@ function displayChildren() {
         card.className = 'child-card';
         
         let vRows = '';
+        // التحقق إذا كان الطفل لديه أي حجز نشط حالياً
+        const hasActiveBooking = child.bookingStatus !== "لا يوجد حجز نشط";
+
         child.vaccinations.forEach(v => {
-            // إضافة زر "تم الأخذ" للتطعميات التي حالتها "قادم" وتخص الحجز الحالي
+            // التعديل هنا: الزر سيظهر لكل التطعيمات القادمة طالما يوجد حجز نشط
             const isPending = v.status === "قادم";
-            const isCurrentlyBooked = child.bookingStatus.includes(v.name);
-            const actionBtn = (isPending && isCurrentlyBooked) ? 
-                `<button onclick="markAsDone(${child.id}, '${v.name}')" class="btn-small" style="background:#10b981; font-size:0.7rem; padding:4px 8px;">تأكيد الأخذ ✅</button>` : '';
+            const actionBtn = (isPending && hasActiveBooking) ? 
+                `<br><button onclick="markAsDone(${child.id}, '${v.name}')" class="btn-small" style="background:#10b981; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer; margin-top:5px; font-size:0.75rem;">
+                    تأكيد الأخذ ✅
+                </button>` : '';
 
             vRows += `<tr>
                 <td>${v.name}</td>
@@ -212,10 +216,10 @@ function displayChildren() {
         });
 
         const bookingInfo = child.bookingEntryDate ? 
-            `<div style="background:#fff7ed; padding:10px; border-radius:8px; margin:10px 0; border-right:4px solid #f97316;">
-                <p style="margin:0; font-weight:bold; color:#c2410c;">📍 ${child.bookingLocation}</p>
-                <p style="margin:0; font-size:0.85rem; color:#7c2d12;">📅 موعدكِ المحجوز: ${child.bookingEntryDate}</p>
-                <small style="color:#9a3412;">(بعد تطعيم طفلكِ، اضغطي "تأكيد الأخذ" في الجدول أدناه)</small>
+            `<div style="background:#fff7ed; padding:12px; border-radius:10px; margin:10px 0; border:1px solid #fed7aa; border-right:5px solid #f97316;">
+                <p style="margin:0; font-weight:bold; color:#c2410c;">📍 المكان: ${child.bookingLocation}</p>
+                <p style="margin:0; font-size:0.9rem; color:#7c2d12;">📅 موعد الحجز: ${child.bookingEntryDate}</p>
+                <p style="margin:5px 0 0 0; font-size:0.8rem; color:#9a3412; font-style:italic;">(ملاحظة: بعد التطعيم، اضغطي على زر "تأكيد الأخذ" في الجدول أدناه لتحديث الكتيب)</p>
             </div>` : '';
 
         card.innerHTML = `
@@ -225,7 +229,7 @@ function displayChildren() {
             </div>
             <h3 style="color:var(--primary);"><i class="fa-solid fa-baby"></i> الطفل: ${child.name}</h3>
             <p><b>تاريخ الميلاد:</b> ${child.birthDate}</p>
-            <p><b>الحالة:</b> <span style="color:#10b981; font-weight:bold;">${child.bookingStatus}</span></p>
+            <p><b>حالة الحجز:</b> <span style="color:#f97316; font-weight:bold;">${child.bookingStatus}</span></p>
             ${bookingInfo}
             <div class="table-wrapper">
                 <table>
@@ -243,6 +247,7 @@ function displayChildren() {
         container.appendChild(card);
     });
 }
+
 
 // ==========================================
 // 4. نظام الحجز (مع تعديل خصم العدد)
