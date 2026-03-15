@@ -231,3 +231,30 @@ footer { background: var(--dark-bg); color: #94a3b8; padding: 30px; text-align: 
     .top-header h1 { font-size: 1.5rem; }
     nav a { padding: 8px 12px; font-size: 0.8rem; }
 }
+/* الحاوية تجعل التموضع بالنسبة لها */
+.password-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+/* تعديل الحقل لترك مسافة للأيقونة */
+.password-wrapper input {
+    width: 100%;
+    padding-left: 40px; /* مسافة من اليسار لكي لا يغطي النص الأيقونة */
+}
+
+/* وضع الأيقونة داخل الحقل */
+.toggle-icon {
+    position: absolute;
+    left: 15px; /* المسافة من جهة اليسار */
+    top: 50%;
+    transform: translateY(-50%); /* للتوسيط العمودي الدقيق */
+    cursor: pointer;
+    color: #666;
+    z-index: 10;
+}
+
+.toggle-icon:hover {
+    color: var(--primary); /* يتغير لونها عند مرور الماوس */
+}
+
