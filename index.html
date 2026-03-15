@@ -69,8 +69,10 @@
         <input type="email" id="regEmail" placeholder="البريد الإلكتروني" class="input-style">
         <input type="tel" id="regPhone" placeholder="رقم الهاتف" class="input-style">
         <div style="position: relative;">
-            <input type="password" id="regPass" placeholder="كلمة مرور" class="input-style">
-            <i class="fa-solid fa-eye" id="toggleRegPass" onclick="togglePass('regPass', 'toggleRegPass')" style="position: absolute; left: 15px; top: 15px; cursor: pointer; color: #64748b;"></i>
+            <div class="password-wrapper">
+    <input type="password" id="loginPass" placeholder="كلمة المرور">
+    <i class="fa-solid fa-eye-slash toggle-icon" id="loginIcon" onclick="togglePass('loginPass', 'loginIcon')"></i>
+</div>
         </div>
         <button onclick="registerUser()" class="btn" style="width: 100%; margin-top: 10px;">إنشاء الحساب</button>
     </div>
