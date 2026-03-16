@@ -98,19 +98,23 @@ function registerUser() {
     window.location.href = 'dashboard.html';
 }
 
+
 function loginUser() {
-   
     const email = document.getElementById('loginEmail')?.value.trim().toLowerCase();
     const pass = document.getElementById('loginPass')?.value;
     let users = JSON.parse(localStorage.getItem('users')) || [];
-    const validUser = users.find(u => u.email === email && u.pass === pass);
+
+    // هذا السطر هو "مفتاح الحل" لأنه يحول الإيميل المخزن لصغير قبل المقارنة
+    const validUser = users.find(u => (u.email || "").toLowerCase() === email && u.pass === pass);
+
     if (validUser) {
         localStorage.setItem('currentUser', JSON.stringify(validUser));
         window.location.href = 'dashboard.html';
     } else {
-        alert("بيانات الدخول غير صحيحة!");
+        alert("بيانات الدخول غير صحيحة! تأكدي من البريد أو كلمة المرور الجديدة.");
     }
 }
+
 
 function logoutUser() {
     localStorage.removeItem('currentUser');
