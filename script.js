@@ -294,7 +294,7 @@ function confirmBooking() {
 
         const templateParams = {
             child_name: children[idx].name,
-            parent_email: currentUser.email,
+            user_email: currentUser.email,
             phone_number: currentUser.phone,
             center_name: centerName,
             vaccine: selectedVac
